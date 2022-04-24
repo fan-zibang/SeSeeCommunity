@@ -1,5 +1,8 @@
 package com.fanzibang.community.controller;
 
+import com.fanzibang.community.common.CommonResult;
+import com.fanzibang.community.common.ReturnCode;
+import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,5 +22,31 @@ public class UserController {
     @GetMapping
     public List<User> getUserList() {
         return userService.list();
+    }
+
+    @GetMapping("/hello")
+    public String getStr(){
+        return "hello,javadaily";
+    }
+
+    @GetMapping("/wrong")
+    public int error(){
+        int i = 9/0;
+        return i;
+    }
+
+    @GetMapping("error1")
+    public void empty(){
+        throw new RuntimeException("自定义异常");
+    }
+
+    @GetMapping("error2")
+    public void empty2(){
+        Asserts.fail("密码错误");
+    }
+
+    @GetMapping("error3")
+    public void empty3(){
+        Asserts.fail(ReturnCode.RC204);
     }
 }
