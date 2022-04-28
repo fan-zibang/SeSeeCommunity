@@ -116,6 +116,7 @@
     <orderEntry type="library" name="Maven: io.netty:netty-transport:4.1.75.Final" level="project" />
     <orderEntry type="library" name="Maven: io.projectreactor:reactor-core:3.4.16" level="project" />
     <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-pool2:2.9.0" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:8.0.28" level="project" />
   </component>
 </module>
