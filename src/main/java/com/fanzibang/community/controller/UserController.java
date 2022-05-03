@@ -1,7 +1,6 @@
 package com.fanzibang.community.controller;
 
 import com.fanzibang.community.dto.UserLoginParam;
-import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +16,11 @@ public class UserController {
     @PostMapping("/login")
     public String login(@RequestBody UserLoginParam userLoginParam) {
         return userService.login(userLoginParam);
+    }
+
+    @GetMapping("/logout")
+    public String logout() {
+        return userService.logout();
     }
 
     @GetMapping("/hello")

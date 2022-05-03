@@ -11,11 +11,13 @@ import com.fanzibang.community.mapper.UserMapper;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.RedisService;
 import com.fanzibang.community.service.UserService;
+import com.fanzibang.community.utils.CommonResult;
 import com.fanzibang.community.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -46,5 +48,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String token = jwtTokenUtil.generateToken(userId);
         redisService.set(RedisKey.LOGIN_USER_KEY + userId, loginUser);
         return token;
+    }
+
+    @Override
+    public String logout() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        Long userId = loginUser.getUser().getId();
+        Boolean isLogout = redisService.del(RedisKey.LOGIN_USER_KEY + userId);
+        if (!isLogout) {
+            Asserts.fail("退出失败");
+        }
+        return "退出成功";
     }
 }

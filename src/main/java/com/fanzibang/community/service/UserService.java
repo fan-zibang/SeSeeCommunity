@@ -6,4 +6,6 @@ import com.fanzibang.community.pojo.User;
 
 public interface UserService extends IService<User> {
     String login(UserLoginParam userLoginParam);
+
+    String logout();
 }
