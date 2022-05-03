@@ -1,7 +1,7 @@
 package com.fanzibang.community.exception;
 
-import com.fanzibang.community.common.CommonResult;
-import com.fanzibang.community.common.ReturnCode;
+import com.fanzibang.community.utils.CommonResult;
+import com.fanzibang.community.constant.ReturnCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,6 +1,6 @@
 package com.fanzibang.community.exception;
 
-import com.fanzibang.community.common.CommonResult;
+import com.fanzibang.community.utils.CommonResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;

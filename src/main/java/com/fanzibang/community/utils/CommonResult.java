@@ -1,5 +1,6 @@
-package com.fanzibang.community.common;
+package com.fanzibang.community.utils;
 
+import com.fanzibang.community.constant.ReturnCode;
 import lombok.Data;
 
 @Data

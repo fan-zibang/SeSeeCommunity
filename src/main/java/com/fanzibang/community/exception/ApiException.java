@@ -1,6 +1,6 @@
 package com.fanzibang.community.exception;
 
-import com.fanzibang.community.common.ReturnCode;
+import com.fanzibang.community.constant.ReturnCode;
 import lombok.Getter;
 import lombok.Setter;
 
