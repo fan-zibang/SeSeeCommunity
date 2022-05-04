@@ -1,25 +1,48 @@
 package com.fanzibang.community.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fanzibang.community.pojo.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-// @JsonIgnoreProperties({"enabled","accountNonExpired", "accountNonLocked", "credentialsNonExpired", "authorities","username","password"})
 public class LoginUser implements UserDetails {
 
     private User user;
+
+    //存储权限信息
+    private List<String> permissionList;
+
+    public LoginUser(User user, List<String> permissionList) {
+        this.user = user;
+        this.permissionList = permissionList;
+    }
+
+    //存储SpringSecurity所需要的权限信息的集合
+    @JsonIgnore
+    private List<GrantedAuthority> authorities;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        if(authorities != null) {
+            return authorities;
+        }
+        // 返回当前用户的权限
+        authorities = permissionList.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        return authorities;
     }
 
     @Override
@@ -49,6 +72,6 @@ public class LoginUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus().equals(1);
+        return true;
     }
 }

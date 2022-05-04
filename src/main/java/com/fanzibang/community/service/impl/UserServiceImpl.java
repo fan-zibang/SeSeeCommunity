@@ -1,6 +1,5 @@
 package com.fanzibang.community.service.impl;
 
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fanzibang.community.constant.RedisKey;
 import com.fanzibang.community.constant.ReturnCode;
@@ -11,7 +10,6 @@ import com.fanzibang.community.mapper.UserMapper;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.RedisService;
 import com.fanzibang.community.service.UserService;
-import com.fanzibang.community.utils.CommonResult;
 import com.fanzibang.community.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,6 +42,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             Asserts.fail(ReturnCode.RC205);
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
+        Integer status = loginUser.getUser().getStatus();
+        if (status == 0 || status == null) {
+            Asserts.fail(ReturnCode.RC203);
+        }
         Long userId = loginUser.getUser().getId();
         String token = jwtTokenUtil.generateToken(userId);
         redisService.set(RedisKey.LOGIN_USER_KEY + userId, loginUser);
