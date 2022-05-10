@@ -1,6 +1,9 @@
 server:
   port: 8090
 
+community:
+  domain: http://localhost:8080
+
 spring:
   application:
     name: community
@@ -26,6 +29,12 @@ spring:
         max-idle: 8 # 连接池中的最大空闲连接
         min-idle: 0 # 连接池中的最小空闲连接
     timeout: 3000ms # 连接超时时间（毫秒）
+  mail:
+    host: smtp.qq.com # 邮箱服务器地址
+    username: brantleyfan@qq.com # 用户名
+    password: fxbizarhlbdebjcf # 授权码
+    port: 587
+
 
 mybatis-plus:
   configuration:

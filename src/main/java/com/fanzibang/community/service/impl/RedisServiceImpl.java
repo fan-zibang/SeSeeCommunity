@@ -21,7 +21,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void set(String key, Object value, long expire) {
-        redisTemplate.opsForValue().set(key, value, expire, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key, value, expire, TimeUnit.MINUTES);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Boolean expire(String key, long expire) {
-        return redisTemplate.expire(key, expire, TimeUnit.SECONDS);
+        return redisTemplate.expire(key, expire, TimeUnit.MINUTES);
     }
 
     @Override
