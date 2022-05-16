@@ -3,11 +3,9 @@ package com.fanzibang.community.controller;
 import com.fanzibang.community.dto.UserParam;
 import com.fanzibang.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
+import javax.validation.Valid;
 
 
 @RestController
@@ -18,7 +16,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public String register(@RequestBody UserParam userParam) {
+    public String register(@RequestBody @Valid UserParam userParam) {
         return userService.register(userParam);
     }
 
@@ -28,20 +26,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserParam userParam) {
+    public String login(@RequestBody @Valid UserParam userParam) {
         return userService.login(userParam);
     }
 
     @GetMapping("/logout")
-    public String logout() {
+    public Long logout() {
         return userService.logout();
     }
 
-    @PreAuthorize("hasAnyAuthority({'admin'})")
+    //@PreAuthorize("hasAnyAuthority({'admin'})")
     @GetMapping("/hello")
-    public List<String> hello() {
-        List<String> userList = Arrays.asList("zhangsan","lisi");
-        return userList;
+    public int hello() {
+        int i = 10/0;
+        return 1;
     }
 
 }

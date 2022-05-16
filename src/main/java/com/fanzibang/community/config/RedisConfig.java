@@ -20,9 +20,6 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-
-        // FastJsonRedisSerializer serializer = new FastJsonRedisSerializer(Object.class);
-
         RedisSerializer<Object> serializer = redisSerializer();
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);

@@ -1,6 +1,5 @@
 package com.fanzibang.community.pojo;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data

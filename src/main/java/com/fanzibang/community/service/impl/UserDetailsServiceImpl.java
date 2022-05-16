@@ -1,20 +1,19 @@
 package com.fanzibang.community.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fanzibang.community.constant.ReturnCode;
 import com.fanzibang.community.constant.Role;
 import com.fanzibang.community.dto.LoginUser;
 import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.UserMapper;
 import com.fanzibang.community.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         queryWrapper.eq(User::getEmail, email);
         User user = userMapper.selectOne(queryWrapper);
         if (Objects.isNull(user)) {
-            Asserts.fail("用户名或密码错误");
+             Asserts.fail(ReturnCode.RC202);
         }
         List<String> list = new ArrayList<>();
         String role;

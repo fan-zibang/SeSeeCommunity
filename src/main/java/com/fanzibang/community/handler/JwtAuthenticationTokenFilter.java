@@ -1,9 +1,7 @@
 package com.fanzibang.community.handler;
 
 import com.fanzibang.community.constant.RedisKey;
-import com.fanzibang.community.constant.ReturnCode;
 import com.fanzibang.community.dto.LoginUser;
-import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.service.RedisService;
 import com.fanzibang.community.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
