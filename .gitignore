@@ -12,4 +12,4 @@ target/
 *.ip
 
 # General
-.DS_Storer
+.DS_Store
