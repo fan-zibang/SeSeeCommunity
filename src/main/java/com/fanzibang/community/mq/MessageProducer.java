@@ -1,16 +1,13 @@
 package com.fanzibang.community.mq;
 
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.fanzibang.community.pojo.Event;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SystemMessageProducer {
+public class MessageProducer {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;

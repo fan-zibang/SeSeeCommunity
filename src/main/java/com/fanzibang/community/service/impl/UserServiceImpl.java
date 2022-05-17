@@ -13,7 +13,7 @@ import com.fanzibang.community.dto.LoginUser;
 import com.fanzibang.community.dto.UserParam;
 import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.UserMapper;
-import com.fanzibang.community.mq.SystemMessageProducer;
+import com.fanzibang.community.mq.MessageProducer;
 import com.fanzibang.community.pojo.Event;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.RedisService;
@@ -51,7 +51,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserMapper userMapper;
 
     @Autowired
-    private SystemMessageProducer systemMessageProducer;
+    private MessageProducer messageProducer;
 
     @Override
     public String register(UserParam userParam) {
@@ -123,7 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .setFromId(MessageConstant.SYSTEM_USER_ID)
                 .setToId(user.getId())
                 .setData("content","欢迎您加入 Community 社区！");
-        systemMessageProducer.sendMessage(event);
+        messageProducer.sendMessage(event);
         return "激活成功";
     }
 

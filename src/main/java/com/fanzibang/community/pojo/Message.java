@@ -3,7 +3,7 @@ package com.fanzibang.community.pojo;
 import lombok.Data;
 
 @Data
-public class SystemMessage {
+public class Message {
 
     private Long id;
     private Long fromId;

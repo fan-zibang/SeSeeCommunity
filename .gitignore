@@ -1,0 +1,15 @@
+# Java class files
+*.class
+
+### user ###
+target/
+/target/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ip
+
+# General
+.DS_Storer

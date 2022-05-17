@@ -24,7 +24,6 @@ public enum RabbitMqEnum {
     C_SYSTEM_MESSAGE_BROKER("system.message.topic","delete.queue","delete");
 
 
-
     /**
      * 交换机名称
      */
