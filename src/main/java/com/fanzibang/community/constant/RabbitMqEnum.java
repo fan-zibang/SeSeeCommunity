@@ -9,14 +9,14 @@ import lombok.Getter;
 public enum RabbitMqEnum {
 
     /**
-     * 系统通知-评论、关注、点赞服务进程
+     * 系统通知-管理员消息、评论、关注、点赞服务进程
      */
-    A_SYSTEM_MESSAGE_BROKER("system.message.topic","comment.follow.like.queue","comment.follow.like"),
+    A_SYSTEM_MESSAGE_BROKER("system.message.topic","admin.comment.follow.like.queue","admin.comment.follow.like"),
 
     /**
-     * 系统通知-管理员消息、发帖服务进程
+     * 系统通知-、发帖服务进程
      */
-    B_SYSTEM_MESSAGE_BROKER("system.message.topic","admin.publish.queue","admin.publish"),
+    B_SYSTEM_MESSAGE_BROKER("system.message.topic","publish.queue","publish"),
 
     /**
      * 系统通知-删帖服务进程

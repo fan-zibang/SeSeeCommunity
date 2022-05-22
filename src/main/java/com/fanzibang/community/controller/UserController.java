@@ -1,45 +1,31 @@
 package com.fanzibang.community.controller;
 
-import com.fanzibang.community.dto.UserParam;
+import com.fanzibang.community.dto.UserInfoParam;
 import com.fanzibang.community.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 
 @RestController
 @RequestMapping("/user")
+@Validated
 public class UserController {
 
-    @Autowired
+    @Resource(name = "userService")
     private UserService userService;
 
-    @PostMapping("/register")
-    public String register(@RequestBody @Valid UserParam userParam) {
-        return userService.register(userParam);
+    @PutMapping("/{id}")
+    public int updateUserInfo(@Valid @PathVariable("id") @Min(0) Long id, @RequestBody UserInfoParam userInfoParam) {
+        return userService.updateUserInfo(id, userInfoParam);
     }
 
-    @GetMapping("/activation/{userId}/{code}")
-    public String activation(@PathVariable("userId") Integer userId, @PathVariable("code") String code) {
-        return userService.activation(userId, code);
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestBody @Valid UserParam userParam) {
-        return userService.login(userParam);
-    }
-
-    @GetMapping("/logout")
-    public Long logout() {
-        return userService.logout();
-    }
-
-    //@PreAuthorize("hasAnyAuthority({'admin'})")
     @GetMapping("/hello")
-    public int hello() {
-        int i = 10/0;
-        return 1;
+    public String hello() {
+        return "hello";
     }
 
 }

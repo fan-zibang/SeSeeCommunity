@@ -1,5 +1,6 @@
 package com.fanzibang.community.handler;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.fanzibang.community.constant.RedisKey;
 import com.fanzibang.community.dto.LoginUser;
 import com.fanzibang.community.service.RedisService;
@@ -39,10 +40,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         String header = request.getHeader(this.tokenHeader);
         if (header != null && header.startsWith(this.tokenHead)) {
             String token = header.substring(this.tokenHead.length());
-            String userId= jwtTokenUtil.getUserIdFromToken(token);
+            String userId = jwtTokenUtil.getUserIdFromToken(token);
             LoginUser loginUser = (LoginUser) redisService.get(RedisKey.LOGIN_USER_KEY + userId);
-            if (!Objects.isNull(loginUser) && jwtTokenUtil.validateToken(token, userId)) {
-                //存入SecurityContextHolder
+            if (!ObjectUtil.isNull(loginUser) && jwtTokenUtil.validateToken(token, userId)) {
+                // 存入SecurityContextHolder
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(loginUser,null,loginUser.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);

@@ -47,8 +47,12 @@ spring:
   web:
     resources:
       add-mappings: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
 
-
+# mybatis-plus
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -64,4 +68,13 @@ jwt:
   expiration: 86400 # (一天)
   tokenHead: 'Bearer '
   tokenHeader: Authorization
+
+oss:
+  qiniu:
+    access-key: 7SzE7Zod_2oDl0TeiuPRpx8wVT1bFZXBiiTXuJKw
+    secret-key: SExQcq0sh5P-S2wXleeMOSogJLarYK3E68H8nnvq
+    bucket: alibb-community
+    url: http://rc0n1vs1q.hn-bkt.clouddn.com
+
+
 

@@ -3,14 +3,17 @@ package com.fanzibang.community.mq;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
 import com.fanzibang.community.pojo.Message;
+import com.fanzibang.community.service.DiscussPostService;
 import com.fanzibang.community.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class MessageConsumer {
@@ -20,19 +23,14 @@ public class MessageConsumer {
     @Autowired
     private MessageService messageService;
 
-    /**
-     * 消费评论、关注、点赞事件
-     */
-    @RabbitListener(queues = "comment.follow.like.queue")
-    public void handleASystemMessage(Event event) {
-
-    }
+    @Autowired
+    private DiscussPostService discussPostService;
 
     /**
-     * 消费管理员消息、发帖事件
+     * 消费管理员消息、评论、关注、点赞事件
      */
-    @RabbitListener(queues = "admin.publish.queue")
-    public void handleBSystemMessage(String msg) {
+    @RabbitListener(queues = "admin.comment.follow.like.queue")
+    public void handleASystemMessage(String msg) {
         Event event = JSONObject.parseObject(msg, Event.class);
 
         if (ObjectUtil.isEmpty(event)) {
@@ -51,10 +49,45 @@ public class MessageConsumer {
     }
 
     /**
+     * 消费发帖事件
+     */
+    @RabbitListener(queues = "publish.queue")
+    public void handleBSystemMessage(String msg) {
+        Event event = JSONObject.parseObject(msg, Event.class);
+
+        if (ObjectUtil.isEmpty(event)) {
+            logger.error("消息内容为空");
+            return;
+        }
+        Long postId = (Long) event.getData().get("postId");
+        if (ObjectUtil.isEmpty(postId)) {
+            logger.error("postId为空，es存取帖子失败");
+            return;
+        }
+        DiscussPost discussPost = discussPostService.getDiscussPostById(postId);
+        // TODO 存入 Elasticsearch 服务器
+
+    }
+
+    /**
      * 消费删帖事件
      */
     @RabbitListener(queues = "delete.queue")
-    public void handleCSystemMessage(Event event) {
+    public void handleCSystemMessage(String msg) {
+        Event event = JSONObject.parseObject(msg, Event.class);
+
+        if (ObjectUtil.isEmpty(event)) {
+            logger.error("消息内容为空");
+            return;
+        }
+        Long postId = (Long) event.getData().get("postId");
+        if (ObjectUtil.isEmpty(postId)) {
+            logger.error("postId为空，es删除帖子失败");
+            return;
+        }
+
+        // TODO 更新 Elasticsearch 服务器
+
 
     }
 
