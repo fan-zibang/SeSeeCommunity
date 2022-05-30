@@ -11,7 +11,6 @@ public class DiscussPost {
     private String content;
     private Byte type;
     private Byte status;
-    private Long likeCount;
     private Long commentCount;
     private Double score;
     private Integer plateId;

@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 
 
 @RestController
@@ -23,7 +24,8 @@ public class LoginController {
     }
 
     @GetMapping("/activation/{userId}/{code}")
-    public String activation(@PathVariable("userId") @Min(0) Long userId, @PathVariable("code") String code) {
+    public String activation(@Valid @PathVariable("userId") @Min(1) Long userId,
+                             @NotEmpty @PathVariable("code") String code) {
         return loginService.activation(userId, code);
     }
 

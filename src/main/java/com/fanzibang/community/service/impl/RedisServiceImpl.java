@@ -4,6 +4,8 @@ import com.fanzibang.community.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,5 +44,97 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Long getExpire(String key) {
         return redisTemplate.getExpire(key);
+    }
+
+    @Override
+    public Boolean hasKey(String key) {
+        return redisTemplate.hasKey(key);
+    }
+
+    @Override
+    public Long incr(String key, long delta) {
+        return redisTemplate.opsForValue().increment(key, delta);
+    }
+
+    @Override
+    public Long decr(String key, long delta) {
+        return redisTemplate.opsForValue().decrement(key, delta);
+    }
+
+    @Override
+    public Object hGet(String key, String hashKey) {
+        return redisTemplate.opsForHash().get(key, hashKey);
+    }
+
+    @Override
+    public Boolean hSet(String key, String hashKey, Object value, long time) {
+        redisTemplate.opsForHash().put(key, hashKey, value);
+        return expire(key, time);
+    }
+
+    @Override
+    public void hSet(String key, String hashKey, Object value) {
+        redisTemplate.opsForHash().put(key, hashKey, value);
+    }
+
+    @Override
+    public Map<Object, Object> hGetAll(String key) {
+        return redisTemplate.opsForHash().entries(key);
+    }
+
+    @Override
+    public Boolean hSetAll(String key, Map<String, Object> map, long time) {
+        redisTemplate.opsForHash().putAll(key, map);
+        return expire(key, time);
+    }
+
+    @Override
+    public void hSetAll(String key, Map<String, ?> map) {
+        redisTemplate.opsForHash().putAll(key, map);
+    }
+
+    @Override
+    public void hDel(String key, Object... hashKey) {
+        redisTemplate.opsForHash().delete(key, hashKey);
+    }
+
+    @Override
+    public Boolean hHasKey(String key, String hashKey) {
+        return redisTemplate.opsForHash().hasKey(key, hashKey);
+    }
+
+    @Override
+    public Long hIncr(String key, String hashKey, Long delta) {
+        return redisTemplate.opsForHash().increment(key, hashKey, delta);
+    }
+
+    @Override
+    public Long hDecr(String key, String hashKey, Long delta) {
+        return redisTemplate.opsForHash().increment(key, hashKey, -delta);
+    }
+
+    @Override
+    public Set<Object> sMembers(String key) {
+        return redisTemplate.opsForSet().members(key);
+    }
+
+    @Override
+    public Long sAdd(String key, Object... values) {
+        return redisTemplate.opsForSet().add(key, values);
+    }
+
+    @Override
+    public Boolean sIsMember(String key, Object value) {
+        return redisTemplate.opsForSet().isMember(key, value);
+    }
+
+    @Override
+    public Long sSize(String key) {
+        return redisTemplate.opsForSet().size(key);
+    }
+
+    @Override
+    public Long sRemove(String key, Object... values) {
+        return redisTemplate.opsForSet().remove(key, values);
     }
 }

@@ -1,5 +1,7 @@
 package com.fanzibang.community.service.impl;
 
+import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -71,6 +73,7 @@ public class LoginServiceImpl implements LoginService {
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setPassword(bCryptPasswordEncoder.encode(password));
+        newUser.setNickname(RandomUtil.randomString(6));
         newUser.setCreateTime(System.currentTimeMillis());
 
         int i = userMapper.insert(newUser);

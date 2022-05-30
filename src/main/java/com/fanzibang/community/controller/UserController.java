@@ -19,7 +19,7 @@ public class UserController {
     private UserService userService;
 
     @PutMapping("/{id}")
-    public int updateUserInfo(@Valid @PathVariable("id") @Min(0) Long id, @RequestBody UserInfoParam userInfoParam) {
+    public int updateUserInfo(@Valid @PathVariable("id") @Min(1) Long id, @RequestBody UserInfoParam userInfoParam) {
         return userService.updateUserInfo(id, userInfoParam);
     }
 

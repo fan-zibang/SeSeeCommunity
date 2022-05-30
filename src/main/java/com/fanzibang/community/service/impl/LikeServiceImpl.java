@@ -1,80 +1,53 @@
-package com.fanzibang.community;
+package com.fanzibang.community.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
-import com.fanzibang.community.constant.MessageConstant;
-import com.fanzibang.community.constant.RabbitMqEnum;
-import com.fanzibang.community.constant.RedisKey;
+import cn.hutool.core.util.ObjectUtil;
+import com.fanzibang.community.constant.*;
+import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mq.MessageProducer;
-import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
-import com.fanzibang.community.service.DiscussPostService;
+import com.fanzibang.community.service.LikeService;
 import com.fanzibang.community.service.RedisService;
-import com.fanzibang.community.utils.JwtTokenUtil;
-import com.fanzibang.community.vo.DiscussPostDetailVo;
-import org.junit.jupiter.api.Test;
+import com.fanzibang.community.utils.UserHolder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
-@SpringBootTest
-class CommunityApplicationTests {
-
-    @Autowired
-    private DiscussPostService discussPostService;
-
-    @Autowired
-    private RedisTemplate redisTemplate;
+@Service
+public class LikeServiceImpl implements LikeService {
 
     @Autowired
     private RedisService redisService;
 
     @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
     private MessageProducer messageProducer;
 
-    @Test
-    void contextLoads() {
-
+    @Override
+    public Boolean isLike(Integer entityType, Long entityId, Long userId) {
+        // 1-帖子 2-评论
+        String suffixKey = entityType == 1 ? "post:" : "comment:";
+        return redisService.sIsMember(RedisKey.LIKE_KEY + suffixKey + entityId, userId);
     }
 
-    @Test
-    void test01() {
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-        System.out.println(bCryptPasswordEncoder.encode("123"));
+    @Override
+    public Long getLikeCount(Integer entityType, Long entityId) {
+        // 1-帖子 2-评论
+        String suffixKey = entityType == 1 ? "post:" : "comment:";
+        return redisService.sSize(RedisKey.LIKE_KEY + suffixKey + entityId);
     }
 
-    @Test
-    void test02() {
-        String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOjEsImNyZWF0ZWQiOjE2NTI4MDMwMDY3NTUsImV4cCI6MTY1Mjg4OTQwNn0.ue8eZUP7NINXCTLJDYqXUOib3EyccsE5a-rS27fDwxs8ZjQ-gQ9QdI8-q2AlgUSWMxMde4NasTDkLQ39sGlHFw";
-        JwtTokenUtil jwtTokenUtil = new JwtTokenUtil();
-        System.out.println(jwtTokenUtil.validateToken(token, "1"));
-    }
-
-    @Test
-    void test03() {
-        DiscussPost post = discussPostService.getDiscussPostById(1L);
-        DiscussPostDetailVo discussPostDetailVo = new DiscussPostDetailVo();
-        BeanUtil.copyProperties(post,discussPostDetailVo);
-        System.out.println(discussPostDetailVo);
-    }
-
-    @Test
-    void test04() {
-        DateTime date = DateUtil.date(1653308439974L);
-        System.out.println(date.toString("yyyy-MM-dd HH:mm"));
-    }
-
-    @Test
-    void test05() {
-        Integer entityType = 1;
-        Long entityId = 1L;
-        Long userId = 1L;
-        Long entityUserId = 5L;
+    @Override
+    public String like(Integer entityType, Long entityId, Long entityUserId) {
+        // 用户未登录不能点赞
+        if (ObjectUtil.isEmpty(UserHolder.getUser())) {
+            Asserts.fail(ReturnCode.RC205);
+        }
+        Long userId = UserHolder.getUser().getId();
         Object execute = redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
@@ -104,6 +77,15 @@ class CommunityApplicationTests {
                 return operations.exec();
             }
         });
-        System.out.println("execute:" + execute);
+        if (ObjectUtil.isEmpty(execute)) {
+            Asserts.fail("点赞失败");
+        }
+        if (entityType == PostConstant.ENTITY_TYPE_POST) {
+            // 将帖子存入redis，方便后期使用定时任务计算热度分数
+            redisService.sAdd(RedisKey.POST_SCORE_KEY, entityId);
+        }
+        return "点赞成功";
     }
+
+
 }
