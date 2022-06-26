@@ -12,8 +12,10 @@ public class User {
     private Byte sex;
     private String location;
     private Integer role;
-    private Integer status;
+    private Byte status;
     private String avatar;
     private Long createTime;
+    private Byte delFlag;
+    private Long lastLogin;
 
 }

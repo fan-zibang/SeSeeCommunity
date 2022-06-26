@@ -1,20 +1,31 @@
 package com.fanzibang.community.controller;
 
 import com.fanzibang.community.service.LikeService;
+import com.fanzibang.community.utils.CommonResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+@Validated
 @RestController
-@RequestMapping("like")
+@RequestMapping("/like")
 public class LikeController {
 
     @Autowired
     private LikeService likeService;
 
     @PostMapping
-    public String like(Integer entityType, Long entityId, Long entityUserId) {
-        return likeService.like(entityType, entityId, entityUserId);
+    public CommonResult like(@Valid @Min(value = 1, message = "1-帖子；2-评论") @Max(value = 2, message = "1-帖子；2-评论") Integer entityType,
+                             @Valid @NotNull Long entityId) {
+        likeService.like(entityType, entityId);
+        return CommonResult.success(null);
     }
 }

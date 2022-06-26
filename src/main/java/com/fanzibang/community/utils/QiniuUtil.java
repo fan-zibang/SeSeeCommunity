@@ -9,6 +9,8 @@ import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,9 @@ import java.io.IOException;
 
 @Component
 public class QiniuUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(QiniuUtil.class);
+
     /**
      * 七牛域名domain
      */
@@ -51,9 +56,9 @@ public class QiniuUtil {
             DefaultPutRet putRet = JSON.parseObject(response.bodyString(), DefaultPutRet.class);
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
+            return false;
         }
-        return false;
     }
 
     public boolean delete(String filename) {
@@ -66,6 +71,7 @@ public class QiniuUtil {
             return true;
         } catch (QiniuException ex) {
             //如果遇到异常，说明删除失败
+            logger.error(ex.getMessage(),ex);
             return false;
         }
     }

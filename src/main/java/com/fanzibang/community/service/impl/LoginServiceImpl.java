@@ -1,11 +1,10 @@
 package com.fanzibang.community.service.impl;
 
-import cn.hutool.core.lang.UUID;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fanzibang.community.constant.MessageConstant;
 import com.fanzibang.community.constant.RabbitMqEnum;
 import com.fanzibang.community.constant.RedisKey;
@@ -21,6 +20,7 @@ import com.fanzibang.community.service.LoginService;
 import com.fanzibang.community.service.RedisService;
 import com.fanzibang.community.utils.JwtTokenUtil;
 import com.fanzibang.community.utils.MailClient;
+import com.fanzibang.community.utils.UserHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,27 +53,32 @@ public class LoginServiceImpl implements LoginService {
     @Autowired
     private MessageProducer messageProducer;
 
+    @Autowired
+    private UserHolder userHolder;
+
     @Override
-    public String register(UserParam userParam) {
+    public Long register(UserParam userParam) {
         String email = userParam.getEmail();
         String password = userParam.getPassword();
 
         // 账号已注册已激活
         User user = userMapper.selectOne(new LambdaQueryWrapper<>(User.class).eq(User::getEmail, email));
-        if (!ObjectUtil.isNull(user) && user.getStatus() == 1) {
+        if (!ObjectUtil.isEmpty(user) && user.getStatus() == 1) {
             Asserts.fail(ReturnCode.RC208);
         }
         // 账号已注册未激活
-        if (!ObjectUtil.isNull(user) && user.getStatus() == 0) {
+        if (!ObjectUtil.isEmpty(user) && user.getStatus() == 0) {
             sendEmailCodeToUser(user.getId(), email);
-            return user.getId().toString();
+            return user.getId();
         }
 
         // 账号未注册
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setPassword(bCryptPasswordEncoder.encode(password));
-        newUser.setNickname(RandomUtil.randomString(6));
+        newUser.setNickname(RandomUtil.randomString(10));
+        newUser.setStatus((byte) 0);
+        newUser.setDelFlag((byte) 0);
         newUser.setCreateTime(System.currentTimeMillis());
 
         int i = userMapper.insert(newUser);
@@ -83,7 +88,7 @@ public class LoginServiceImpl implements LoginService {
         // 给注册用户发送激活邮件
         Long newUserId = newUser.getId();
         sendEmailCodeToUser(newUserId, email);
-        return newUserId.toString();
+        return newUserId;
     }
 
     public void sendEmailCodeToUser(Long userId, String email) {
@@ -95,13 +100,13 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public String activation(Long userId, String code) {
+    public void activation(Long userId, String code) {
         // 是否重复激活
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(User::getId, User::getStatus).eq(User::getId, userId);
         User user = userMapper.selectOne(queryWrapper);
-        if (ObjectUtil.isNull(user)) {
-            Asserts.fail("激活失败");
+        if (ObjectUtil.isEmpty(user)) {
+            Asserts.fail(ReturnCode.RC211);
         }
         if (user.getStatus() == 1) {
             Asserts.fail(ReturnCode.RC207);
@@ -113,8 +118,11 @@ public class LoginServiceImpl implements LoginService {
         if (!code.equals(activation_code)) {
             Asserts.fail(ReturnCode.RC210);
         }
-        user.setStatus(1);
-        userMapper.updateById(user);
+        user.setStatus((byte) 1);
+        int i = userMapper.updateById(user);
+        if (i <= 0) {
+           Asserts.fail(ReturnCode.RC215);
+        }
         redisService.del(RedisKey.REGISTER_CODE_KEY + userId);
         // 发送系统通知
         Event event = new Event()
@@ -125,7 +133,6 @@ public class LoginServiceImpl implements LoginService {
                 .setToId(user.getId())
                 .setData("content","欢迎您加入 Community 社区！");
         messageProducer.sendMessage(event);
-        return "激活成功";
     }
 
     @Override
@@ -134,12 +141,11 @@ public class LoginServiceImpl implements LoginService {
                 new UsernamePasswordAuthenticationToken(userParam.getEmail(), userParam.getPassword());
         // 认证
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
-        if (ObjectUtil.isNull(authenticate)) {
+        if (ObjectUtil.isEmpty(authenticate)) {
             Asserts.fail(ReturnCode.RC202);
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
-        Integer status = loginUser.getUser().getStatus();
-        if (status == 0 || status == null) {
+        if (!loginUser.isEnabled()) {
             Asserts.fail(ReturnCode.RC203);
         }
         Long userId = loginUser.getUser().getId();
@@ -149,15 +155,20 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public Long logout() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        Long userId = loginUser.getUser().getId();
-        Boolean isLogout = redisService.del(RedisKey.LOGIN_USER_KEY + userId);
-        if (!isLogout) {
-            Asserts.fail("退出失败");
+    public void logout() {
+        User user = userHolder.getUser();
+        if (ObjectUtil.isEmpty(user)) {
+            Asserts.fail(ReturnCode.RC205);
         }
-        return userId;
+        Boolean isLogout = redisService.del(RedisKey.LOGIN_USER_KEY + user.getId());
+        if (!isLogout) {
+            Asserts.fail(ReturnCode.RC214);
+        }
+        SecurityContextHolder.clearContext();
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(User::getLastLogin,System.currentTimeMillis()).eq(User::getId,user.getId());
+        userMapper.update(null,updateWrapper);
+
     }
 
 }

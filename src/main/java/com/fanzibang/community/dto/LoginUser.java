@@ -1,10 +1,7 @@
 package com.fanzibang.community.dto;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.fanzibang.community.pojo.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -72,6 +69,6 @@ public class LoginUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.getStatus() == 1 && user.getDelFlag() == 0;
     }
 }

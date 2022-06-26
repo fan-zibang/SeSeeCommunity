@@ -1,5 +1,6 @@
 package com.fanzibang.community.exception;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.fanzibang.community.utils.CommonResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -26,6 +27,9 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     @SneakyThrows
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        /*if (ObjectUtil.isNull(body)) {
+            return objectMapper.writeValueAsString(CommonResult.success(null));
+        }*/
         if (body instanceof String) {
             return objectMapper.writeValueAsString(CommonResult.success(body));
         }

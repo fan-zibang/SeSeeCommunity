@@ -51,7 +51,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(
                         "/login",
                         "/register",
-                        "/activation/**/**").permitAll() // 对登录注册接口允许匿名访问
+                        "/activation/**/**",
+                        "/discussPost/**",
+                        "/comment/{postId}").permitAll() // 对登录注册接口允许匿名访问
                 .antMatchers(HttpMethod.OPTIONS).permitAll() // 跨域请求会先进行一次options请求
                 .anyRequest().authenticated(); // 除上面外的所有请求请求全部需要鉴权认证
         // 禁用缓存
@@ -64,6 +66,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint);
         //允许跨域
         http.cors();
+        // Security 底层会默认拦截 /logout 请求，进行退出处理
+        // 此处赋予它一个根本不存在的退出路径，使得程序能够执行到我们自己编写的退出代码
+        http.logout().logoutUrl("/securitylogout");
     }
 
     @Bean

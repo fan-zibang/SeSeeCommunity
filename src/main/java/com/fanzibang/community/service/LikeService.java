@@ -5,5 +5,5 @@ public interface LikeService {
 
     Long getLikeCount(Integer entityType, Long entityId);
 
-    String like(Integer entityType, Long entityId, Long entityUserId);
+    void like(Integer entityType, Long entityId);
 }

@@ -6,10 +6,10 @@ public interface LoginService {
 
     String login(UserParam userParam);
 
-    Long logout();
+    void logout();
 
-    String register(UserParam userParam);
+    Long register(UserParam userParam);
 
-    String activation(Long userId, String code);
+    void activation(Long userId, String code);
 
 }

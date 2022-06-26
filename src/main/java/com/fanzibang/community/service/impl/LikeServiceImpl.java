@@ -2,8 +2,13 @@ package com.fanzibang.community.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.fanzibang.community.constant.*;
+import com.fanzibang.community.exception.ApiException;
 import com.fanzibang.community.exception.Asserts;
+import com.fanzibang.community.mapper.CommentMapper;
+import com.fanzibang.community.mapper.DiscussPostMapper;
 import com.fanzibang.community.mq.MessageProducer;
+import com.fanzibang.community.pojo.Comment;
+import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
 import com.fanzibang.community.service.LikeService;
 import com.fanzibang.community.service.RedisService;
@@ -15,8 +20,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class LikeServiceImpl implements LikeService {
+
+    @Autowired
+    private UserHolder userHolder;
 
     @Autowired
     private RedisService redisService;
@@ -26,6 +36,12 @@ public class LikeServiceImpl implements LikeService {
 
     @Autowired
     private MessageProducer messageProducer;
+
+    @Autowired
+    private DiscussPostMapper discussPostMapper;
+
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
     public Boolean isLike(Integer entityType, Long entityId, Long userId) {
@@ -42,17 +58,31 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public String like(Integer entityType, Long entityId, Long entityUserId) {
-        // 用户未登录不能点赞
-        if (ObjectUtil.isEmpty(UserHolder.getUser())) {
-            Asserts.fail(ReturnCode.RC205);
-        }
-        Long userId = UserHolder.getUser().getId();
+    public void like(Integer entityType, Long entityId) {
+        /**
+         * 是否有必要在点赞前判断该实体是否存在和对应的实体作者是否对应实体
+         * 防止别人恶意点赞不存在的帖子和评论
+         * 但是多了查询的耗时，是否有更好的解决办法
+         */
+        Long userId = userHolder.getUser().getId();
         Object execute = redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
+                String suffixKey = null;
+                Long entityUserId = null;
+                if (entityType == PostConstant.ENTITY_TYPE_POST) {
+                    suffixKey = "post:";
+                    DiscussPost discussPost = discussPostMapper.selectById(entityId);
+                    Optional.ofNullable(discussPost).orElseThrow(() -> new ApiException(ReturnCode.RC301));
+                    entityUserId = discussPost.getUserId();
+                }
+                if (entityType == PostConstant.ENTITY_TYPE_COMMENT) {
+                    suffixKey = "comment:";
+                    Comment comment = commentMapper.selectById(entityId);
+                    Optional.ofNullable(comment).orElseThrow(() -> new ApiException(ReturnCode.RC402));
+                    entityUserId = comment.getUserId();
+                }
                 // 1-帖子 2-评论
-                String suffixKey = entityType == 1 ? "post:" : "comment:";
                 boolean isLike = redisService.sIsMember(RedisKey.LIKE_KEY + suffixKey + entityId, userId);
                 // 开启事务
                 operations.multi();
@@ -77,14 +107,11 @@ public class LikeServiceImpl implements LikeService {
                 return operations.exec();
             }
         });
-        if (ObjectUtil.isEmpty(execute)) {
-            Asserts.fail("点赞失败");
-        }
+        Optional.ofNullable(execute).orElseThrow(() -> new ApiException(ReturnCode.RC450));
         if (entityType == PostConstant.ENTITY_TYPE_POST) {
             // 将帖子存入redis，方便后期使用定时任务计算热度分数
             redisService.sAdd(RedisKey.POST_SCORE_KEY, entityId);
         }
-        return "点赞成功";
     }
 
 

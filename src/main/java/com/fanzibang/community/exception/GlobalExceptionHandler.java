@@ -1,5 +1,7 @@
 package com.fanzibang.community.exception;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.fanzibang.community.utils.CommonResult;
 import com.fanzibang.community.constant.ReturnCode;
 import org.slf4j.Logger;
@@ -14,9 +16,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.Set;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -80,7 +85,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public CommonResult handleConstraintViolationException(ConstraintViolationException e) {
         logger.info("参数校验错误：{}", e.getMessage());
-        return CommonResult.validateFail(e.getMessage());
+        return CommonResult.validateFail(StrUtil.subAfter(e.getMessage(),".", true));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public CommonResult handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        logger.info("上传文件错误：{}", e.getMessage(), e);
+        return CommonResult.fail(ReturnCode.RC1005);
     }
 
     /**

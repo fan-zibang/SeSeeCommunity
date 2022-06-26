@@ -1,8 +1,10 @@
 package com.fanzibang.community.config;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
@@ -14,7 +16,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 // 是否允许cookie
                 .allowCredentials(true)
                 // 设置允许的请求方式
-                .allowedMethods("GET", "POST", "DELETE", "PUT")
+                .allowedMethods("GET", "POST", "DELETE", "PUT", "PATCH")
                 // 设置允许的header属性
                 .allowedHeaders("*")
                 // 跨域允许时间

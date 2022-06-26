@@ -8,6 +8,8 @@ public class Comment {
     private Long id;
     // 发布评论的作者
     private Long userId;
+    // 父级评论id
+    private Long parentId;
     // 评论目标的类型（帖子、评论）
     private Integer entityType;
     // 评论目标的 id

@@ -59,12 +59,15 @@ public class MessageConsumer {
             logger.error("消息内容为空");
             return;
         }
-        Long postId = Long.valueOf(event.getData().get("postId").toString());
 
-        if (ObjectUtil.isEmpty(postId)) {
+        if (ObjectUtil.isEmpty(event.getData().get("postId"))) {
             logger.error("postId为空，es存取帖子失败");
             return;
         }
+
+        Long postId = Long.valueOf(event.getData().get("postId").toString());
+
+
         DiscussPost discussPost = discussPostService.getDiscussPostById(postId);
         // TODO 存入 Elasticsearch 服务器
 
