@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
             page = new Page<>(current, size,false);
         }
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Comment::getEntityType, PostConstant.ENTITY_TYPE_POST)
+        queryWrapper.eq(Comment::getEntityType, EntityTypeConstant.ENTITY_TYPE_POST)
                 .eq(Comment::getEntityId, postId)
                 .orderByAsc(Comment::getCreateTime);
         List<Comment> commentList = commentMapper.selectPage(page, queryWrapper).getRecords();
@@ -75,19 +75,19 @@ public class CommentServiceImpl implements CommentService {
                 commentVo.put("nickName", nickname);
 
                 commentVo.put("content", comment.getContent());
-                commentVo.put("likeCount", likeService.getLikeCount(PostConstant.ENTITY_TYPE_COMMENT, comment.getId()));
+                commentVo.put("likeCount", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId()));
                 // 该用户是否对该评论点赞
                 User user = userHolder.getUser();
                 if (ObjectUtil.isEmpty(user)) {
                     commentVo.put("isLike", false);
                 }else {
-                    Boolean like = likeService.isLike(PostConstant.ENTITY_TYPE_COMMENT, comment.getId(), user.getId());
+                    Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId(), user.getId());
                     commentVo.put("isLike", like);
                 }
                 // 封装每个评论对应的回复及其相关信息
                 List<Map<String, Object>> replyCommentVoList = new ArrayList<>();
                 LambdaQueryWrapper<Comment> replyQueryWrapper = new LambdaQueryWrapper<>();
-                replyQueryWrapper.eq(Comment::getEntityType, PostConstant.ENTITY_TYPE_COMMENT)
+                replyQueryWrapper.eq(Comment::getEntityType, EntityTypeConstant.ENTITY_TYPE_COMMENT)
                         .eq(Comment::getParentId, comment.getId())
                         .orderByAsc(Comment::getCreateTime);
                 List<Comment> replyCommentList = commentMapper.selectList(replyQueryWrapper);
@@ -108,10 +108,10 @@ public class CommentServiceImpl implements CommentService {
                     if (ObjectUtil.isEmpty(user)) {
                         replyCommentVo.put("isLike", false);
                     } else {
-                        Boolean like = likeService.isLike(PostConstant.ENTITY_TYPE_COMMENT, replyComment.getId(), user.getId());
+                        Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId(), user.getId());
                         replyCommentVo.put("isLike", like);
                     }
-                    replyCommentVo.put("likeCount", likeService.getLikeCount(PostConstant.ENTITY_TYPE_COMMENT, replyComment.getId()));
+                    replyCommentVo.put("likeCount", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId()));
                     replyCommentVoList.add(replyCommentVo);
                 }
                 commentVo.put("replyCommentList",replyCommentVoList);
@@ -133,7 +133,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setUserId(user.getId());
         comment.setCreateTime(System.currentTimeMillis());
         Comment targetComment = null;
-        if (commentParam.getEntityType() == PostConstant.ENTITY_TYPE_COMMENT) {
+        if (commentParam.getEntityType() == EntityTypeConstant.ENTITY_TYPE_COMMENT) {
             targetComment = commentMapper.selectById(commentParam.getEntityId());
             comment.setTargetId(targetComment.getUserId());
         }
@@ -153,13 +153,13 @@ public class CommentServiceImpl implements CommentService {
                 .setFromId(user.getId())
                 .setData("entityType", commentParam.getEntityType())
                 .setData("entityId", commentParam.getEntityId());
-        if (commentParam.getEntityType() == PostConstant.ENTITY_TYPE_POST) {
+        if (commentParam.getEntityType() == EntityTypeConstant.ENTITY_TYPE_POST) {
             DiscussPost discussPost = discussPostService.getDiscussPostById(commentParam.getEntityId());
             event.setToId(discussPost.getUserId());
             // 放入Redis，后期重新更新分数
             redisService.sAdd(RedisKey.POST_SCORE_KEY, commentParam.getEntityId());
         }
-        if (commentParam.getEntityType() == PostConstant.ENTITY_TYPE_COMMENT) {
+        if (commentParam.getEntityType() == EntityTypeConstant.ENTITY_TYPE_COMMENT) {
             event.setToId(targetComment.getUserId());
         }
         messageProducer.sendMessage(event);

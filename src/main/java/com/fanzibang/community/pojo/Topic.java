@@ -3,7 +3,7 @@ package com.fanzibang.community.pojo;
 import lombok.Data;
 
 @Data
-public class Plate {
+public class Topic {
 
     private Integer id;
     private String name;

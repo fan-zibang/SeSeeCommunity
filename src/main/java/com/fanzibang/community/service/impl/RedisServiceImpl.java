@@ -3,6 +3,7 @@ package com.fanzibang.community.service.impl;
 import com.fanzibang.community.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,11 @@ public class RedisServiceImpl implements RedisService {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Override
+    public <T> T execute(SessionCallback<T> session) {
+        return redisTemplate.execute(session);
+    }
 
     @Override
     public void set(String key, Object value) {
@@ -137,4 +143,20 @@ public class RedisServiceImpl implements RedisService {
     public Long sRemove(String key, Object... values) {
         return redisTemplate.opsForSet().remove(key, values);
     }
+
+    @Override
+    public Double zScore (String key, Object value) {
+        return redisTemplate.opsForZSet().score(key, value);
+    }
+
+    @Override
+    public Boolean zAdd(String key, Object value, Double score) {
+        return redisTemplate.opsForZSet().add(key, value, score);
+    }
+
+    @Override
+    public Long zRemove(String key, Object... value) {
+        return redisTemplate.opsForZSet().remove(key, value);
+    }
+
 }

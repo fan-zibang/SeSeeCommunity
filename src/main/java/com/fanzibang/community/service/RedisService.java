@@ -1,5 +1,7 @@
 package com.fanzibang.community.service;
 
+import org.springframework.data.redis.core.SessionCallback;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -7,6 +9,8 @@ import java.util.Set;
  * redis 操作 service
  */
 public interface RedisService {
+
+    <T> T execute(SessionCallback<T> session);
 
     void set(String key, Object value);
 
@@ -108,5 +112,16 @@ public interface RedisService {
     Long sRemove(String key, Object... values);
 
 
+    /**
+     * 获取Zet结构中该key的分数
+     */
+    Double zScore (String key, Object value);
+
+    /**
+     * 向Zset结构添加属性
+     */
+    Boolean zAdd(String key, Object value, Double score);
+
+    Long zRemove(String key, Object... value);
 
 }

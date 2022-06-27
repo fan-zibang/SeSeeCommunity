@@ -13,7 +13,7 @@ public class DiscussPost {
     private Byte status;
     private Long commentCount;
     private Double score;
-    private Integer plateId;
+    private Integer topicId;
     private Long createTime;
 
 }

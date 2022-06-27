@@ -106,4 +106,11 @@ class CommunityApplicationTests {
         });
         System.out.println("execute:" + execute);
     }
+
+    @Test
+    void test06() {
+        // Double score = redisTemplate.opsForZSet().score("user:follower:1", 5);
+        Double score = redisService.zScore(RedisKey.USER_FOLLOWER_KEY + 1, 5);
+        System.out.println(score);
+    }
 }

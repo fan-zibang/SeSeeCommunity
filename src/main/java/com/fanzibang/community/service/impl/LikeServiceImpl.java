@@ -1,9 +1,7 @@
 package com.fanzibang.community.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.fanzibang.community.constant.*;
 import com.fanzibang.community.exception.ApiException;
-import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.CommentMapper;
 import com.fanzibang.community.mapper.DiscussPostMapper;
 import com.fanzibang.community.mq.MessageProducer;
@@ -59,24 +57,19 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public void like(Integer entityType, Long entityId) {
-        /**
-         * 是否有必要在点赞前判断该实体是否存在和对应的实体作者是否对应实体
-         * 防止别人恶意点赞不存在的帖子和评论
-         * 但是多了查询的耗时，是否有更好的解决办法
-         */
         Long userId = userHolder.getUser().getId();
         Object execute = redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
                 String suffixKey = null;
                 Long entityUserId = null;
-                if (entityType == PostConstant.ENTITY_TYPE_POST) {
+                if (entityType == EntityTypeConstant.ENTITY_TYPE_POST) {
                     suffixKey = "post:";
                     DiscussPost discussPost = discussPostMapper.selectById(entityId);
                     Optional.ofNullable(discussPost).orElseThrow(() -> new ApiException(ReturnCode.RC301));
                     entityUserId = discussPost.getUserId();
                 }
-                if (entityType == PostConstant.ENTITY_TYPE_COMMENT) {
+                if (entityType == EntityTypeConstant.ENTITY_TYPE_COMMENT) {
                     suffixKey = "comment:";
                     Comment comment = commentMapper.selectById(entityId);
                     Optional.ofNullable(comment).orElseThrow(() -> new ApiException(ReturnCode.RC402));
@@ -108,7 +101,7 @@ public class LikeServiceImpl implements LikeService {
             }
         });
         Optional.ofNullable(execute).orElseThrow(() -> new ApiException(ReturnCode.RC450));
-        if (entityType == PostConstant.ENTITY_TYPE_POST) {
+        if (entityType == EntityTypeConstant.ENTITY_TYPE_POST) {
             // 将帖子存入redis，方便后期使用定时任务计算热度分数
             redisService.sAdd(RedisKey.POST_SCORE_KEY, entityId);
         }

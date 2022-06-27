@@ -13,7 +13,7 @@ import com.fanzibang.community.mapper.DiscussPostMapper;
 import com.fanzibang.community.mq.MessageProducer;
 import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
-import com.fanzibang.community.pojo.Plate;
+import com.fanzibang.community.pojo.Topic;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.*;
 import com.fanzibang.community.utils.UserHolder;
@@ -52,7 +52,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     private LikeService likeService;
 
     @Autowired
-    private PlateService plateService;
+    private TopicService topicService;
 
     @Autowired
     private RedisService redisService;
@@ -160,7 +160,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         if (ObjectUtil.isEmpty(user)) {
             discussPostDetailVo.setIsLike(false);
         }else {
-            Boolean isLike = likeService.isLike(PostConstant.ENTITY_TYPE_POST, id, user.getId());
+            Boolean isLike = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_POST, id, user.getId());
             discussPostDetailVo.setIsLike(isLike);
         }
         return discussPostDetailVo;
@@ -180,7 +180,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         discussPost.setStatus((byte) 0);
         discussPost.setCommentCount(0L);
         discussPost.setScore(0D);
-        discussPost.setPlateId(discussPostParam.getPlateId());
+        discussPost.setTopicId(discussPostParam.getTopicId());
         discussPost.setCreateTime(System.currentTimeMillis());
         int i = discussPostMapper.insert(discussPost);
         if (i <= 0) {
@@ -250,11 +250,11 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         if (!ObjectUtil.isEmpty(user)) {
             discussPostDetailVo.setAuthor(user.getNickname());
         }
-        Long likeCount = likeService.getLikeCount(PostConstant.ENTITY_TYPE_POST, discussPost.getId());
+        Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());
         discussPostDetailVo.setLikeCount(likeCount);
-        Plate plate = plateService.getPlateById(discussPost.getPlateId());
-        if (!ObjectUtil.isEmpty(plate)) {
-            discussPostDetailVo.setPlate(plate.getName());
+        Topic topic = topicService.getTopicById(discussPost.getTopicId());
+        if (!ObjectUtil.isEmpty(topic)) {
+            discussPostDetailVo.setPlate(topic.getName());
         }
         String createTime = DateUtil.date(discussPost.getCreateTime()).toString("yyyy-MM-dd HH:mm");
         discussPostDetailVo.setCreateTime(createTime);

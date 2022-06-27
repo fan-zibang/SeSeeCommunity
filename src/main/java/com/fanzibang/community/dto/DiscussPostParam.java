@@ -14,6 +14,6 @@ public class DiscussPostParam {
     @NotEmpty
     private String content;
     @NotEmpty
-    private Integer plateId;
+    private Integer topicId;
 
 }
