@@ -3,6 +3,9 @@ package com.fanzibang.community;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.fanzibang.community.constant.MessageConstant;
 import com.fanzibang.community.constant.RabbitMqEnum;
 import com.fanzibang.community.constant.RedisKey;
@@ -112,5 +115,13 @@ class CommunityApplicationTests {
         // Double score = redisTemplate.opsForZSet().score("user:follower:1", 5);
         Double score = redisService.zScore(RedisKey.USER_FOLLOWER_KEY + 1, 5);
         System.out.println(score);
+    }
+
+    @Test
+    void test07() {
+        Snowflake snowflake = IdUtil.createSnowflake(1,1);
+        long id = snowflake.nextId();
+        System.out.println(id);
+
     }
 }

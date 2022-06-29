@@ -159,4 +159,9 @@ public class RedisServiceImpl implements RedisService {
         return redisTemplate.opsForZSet().remove(key, value);
     }
 
+    @Override
+    public Long zCard(String key) {
+        return redisTemplate.opsForZSet().zCard(key);
+    }
+
 }

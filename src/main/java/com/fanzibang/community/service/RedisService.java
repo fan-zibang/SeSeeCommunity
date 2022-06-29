@@ -124,4 +124,6 @@ public interface RedisService {
 
     Long zRemove(String key, Object... value);
 
+    Long zCard(String key);
+
 }

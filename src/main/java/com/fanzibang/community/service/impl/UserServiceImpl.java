@@ -2,6 +2,7 @@ package com.fanzibang.community.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fanzibang.community.constant.ReturnCode;
@@ -16,6 +17,8 @@ import com.fanzibang.community.vo.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service("userService")
@@ -36,6 +39,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Integer updateUserInfo(UserInfoParam userInfoParam) {
         User user = userHolder.getUser();
+        if (!user.getNickname().equals(userInfoParam.getNickname())) {
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(User::getNickname, userInfoParam.getNickname());
+            List<User> userList = userMapper.selectList(queryWrapper);
+            if (userList.size() > 0) {
+                Asserts.fail(ReturnCode.RC217);
+            }
+        }
         BeanUtil.copyProperties(userInfoParam,user);
         int i = userMapper.updateById(user);
         if (i <= 0) {
