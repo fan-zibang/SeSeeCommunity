@@ -3,10 +3,11 @@ package com.fanzibang.community.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.fanzibang.community.constant.EntityTypeConstant;
-import com.fanzibang.community.constant.RedisKey;
-import com.fanzibang.community.constant.ReturnCode;
+import com.fanzibang.community.constant.*;
 import com.fanzibang.community.exception.ApiException;
+import com.fanzibang.community.mq.MessageConsumer;
+import com.fanzibang.community.mq.MessageProducer;
+import com.fanzibang.community.pojo.Event;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.FollowService;
 import com.fanzibang.community.service.RedisService;
@@ -37,21 +38,29 @@ public class FollowServiceImpl implements FollowService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MessageProducer messageProducer;
+
 
     @Override
     public void follow(Integer entityType, Long entityId) {
         User user = userHolder.getUser();
         Optional.ofNullable(user).orElseThrow(() -> new ApiException(ReturnCode.RC205));
+        Boolean follow = isFollow(entityType, entityId);
+        Boolean limit = redisService.sIsMember(RedisKey.FOLLOW_LIMIT_KEY + entityId, user.getId());
         Object execute = redisService.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
-                Boolean follow = isFollow(entityType, entityId);
                 operations.multi();
                 if (entityType == EntityTypeConstant.ENTITY_TYPE_USER) {
-                    // 如果将isFollow放到execute里执行，score一直为null
                     if (!follow) {
                         operations.opsForZSet().add(RedisKey.USER_FOLLOWER_KEY + user.getId(), entityId, System.currentTimeMillis());
                         operations.opsForZSet().add(RedisKey.USER_FANS_KEY + entityId, user.getId(), System.currentTimeMillis());
+                        // 一天内不会发送重复关注不会发送关注通知
+                        if (!limit) {
+                            redisService.sAdd(RedisKey.FOLLOW_LIMIT_KEY + entityId, user.getId());
+                            redisService.expire(RedisKey.FOLLOW_LIMIT_KEY + entityId, 1440);
+                        }
                     } else {
                         operations.opsForZSet().remove(RedisKey.USER_FOLLOWER_KEY + user.getId(), entityId);
                         operations.opsForZSet().remove(RedisKey.USER_FANS_KEY + entityId, user.getId());
@@ -68,8 +77,19 @@ public class FollowServiceImpl implements FollowService {
             }
         });
         Optional.ofNullable(execute).orElseThrow(() -> new ApiException(ReturnCode.RC451));
+        if (entityType == EntityTypeConstant.ENTITY_TYPE_USER) {
+            if (!follow && !limit) {
+                Event event = new Event().setExchange(RabbitMqEnum.A_SYSTEM_MESSAGE_BROKER.getExchange())
+                        .setRoutingKey(RabbitMqEnum.A_SYSTEM_MESSAGE_BROKER.getRoutingKey())
+                        .setType(MessageConstant.TOPIC_FOLLOW)
+                        .setFromId(user.getId())
+                        .setToId(entityId);
+                messageProducer.sendMessage(event);
+            }
+        }
     }
 
+    @Override
     public Boolean isFollow(Integer entityType, Long entityId) {
         Long userId = userHolder.getUser().getId();
         Double score = null;

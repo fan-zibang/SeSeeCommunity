@@ -17,4 +17,6 @@ public interface FollowService {
     Long getTopicCount(Long uid);
 
     Long getFansCount(Long uid);
+
+    Boolean isFollow(Integer entityType, Long entityId);
 }

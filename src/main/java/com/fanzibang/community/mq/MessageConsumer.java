@@ -42,10 +42,12 @@ public class MessageConsumer {
         message.setType(event.getType());
         message.setFromId(event.getFromId());
         message.setToId(event.getToId());
-        message.setContent(JSONUtil.toJsonStr(event.getData()));
+        if (ObjectUtil.isNotEmpty(event.getData())) {
+            message.setContent(JSONUtil.toJsonStr(event.getData()));
+        }
         message.setStatus(0);
         message.setCreateTime(System.currentTimeMillis());
-        messageService.save(message);
+        messageService.addMessage(message);
     }
 
     /**

@@ -7,6 +7,8 @@ public class RedisKey {
     public static String REGISTER_CODE_KEY = "register:";
     // 点赞记录key
     public static String LIKE_KEY = "like:";
+    // 点赞限制key（防止用户重复点击点赞，重复发送点赞通知）
+    public static String LIKE_LIMIT_KEY = "like:limit:";
     // 用户获得总点赞数量（帖子点赞 + 评论点赞）
     public static String USER_LIKE_KEY = "user:like:";
     // 帖子热度分数key
@@ -15,6 +17,8 @@ public class RedisKey {
     public static String USER_FANS_KEY = "user:fans:";
     // 用户关注的人
     public static String USER_FOLLOWER_KEY = "user:follower:";
+    // 关注限制key（防止用户重复点击关注，重复发送关注通知）
+    public static String FOLLOW_LIMIT_KEY = "follow:limit:";
     // 用户关注的话题
     public static String USER_TOPIC_KEY = "user:topic:";
 }

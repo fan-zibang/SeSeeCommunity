@@ -72,17 +72,17 @@ public class CommentServiceImpl implements CommentService {
                 commentVo.put("id", comment.getId());
                 User commentUser = userService.getById(comment.getUserId());
                 String nickname = !ObjectUtil.isEmpty(commentUser) ? commentUser.getNickname() : null;
-                commentVo.put("nickName", nickname);
+                commentVo.put("nickname", nickname);
 
                 commentVo.put("content", comment.getContent());
-                commentVo.put("likeCount", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId()));
+                commentVo.put("like_count", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId()));
                 // 该用户是否对该评论点赞
                 User user = userHolder.getUser();
                 if (ObjectUtil.isEmpty(user)) {
-                    commentVo.put("isLike", false);
+                    commentVo.put("is_like", false);
                 }else {
                     Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId(), user.getId());
-                    commentVo.put("isLike", like);
+                    commentVo.put("is_like", like);
                 }
                 // 封装每个评论对应的回复及其相关信息
                 List<Map<String, Object>> replyCommentVoList = new ArrayList<>();
@@ -97,24 +97,24 @@ public class CommentServiceImpl implements CommentService {
 
                     User replyCommentUser = userService.getById(replyComment.getUserId());
                     String replyNickName = !ObjectUtil.isEmpty(replyCommentUser) ? replyCommentUser.getNickname() : null;
-                    replyCommentVo.put("replyNickName", replyNickName);
+                    replyCommentVo.put("reply_nickname", replyNickName);
 
                     replyCommentVo.put("content", replyComment.getContent());
 
                     User targetUser = userService.getById(replyComment.getTargetId());
                     String targetNickName = !ObjectUtil.isEmpty(targetUser) ? targetUser.getNickname() : null;
-                    replyCommentVo.put("targetNickName", targetNickName);
+                    replyCommentVo.put("target_nickname", targetNickName);
 
                     if (ObjectUtil.isEmpty(user)) {
-                        replyCommentVo.put("isLike", false);
+                        replyCommentVo.put("is_like", false);
                     } else {
                         Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId(), user.getId());
-                        replyCommentVo.put("isLike", like);
+                        replyCommentVo.put("is_like", like);
                     }
-                    replyCommentVo.put("likeCount", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId()));
+                    replyCommentVo.put("like_count", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId()));
                     replyCommentVoList.add(replyCommentVo);
                 }
-                commentVo.put("replyCommentList",replyCommentVoList);
+                commentVo.put("reply_comment_list",replyCommentVoList);
                 commentVoList.add(commentVo);
             }
         }
@@ -141,20 +141,30 @@ public class CommentServiceImpl implements CommentService {
         if (i <= 0) {
             Asserts.fail(ReturnCode.RC401);
         }
+        // 更新文章的评论数
         LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.setSql("comment_count = comment_count + 1").eq(DiscussPost::getId,postId);
         discussPostMapper.update(null,updateWrapper);
 
-        // 触发评论事件（系统通知）
+        // 如果作者自己评论自己的文章，不触发评论通知事件
+        DiscussPost discussPost = null;
+        if (commentParam.getEntityType() == EntityTypeConstant.ENTITY_TYPE_POST) {
+            discussPost = discussPostService.getDiscussPostById(postId);
+            if (discussPost.getUserId() == user.getId()) {
+                return i;
+            }
+        }
+
+        // 触发评论通知事件
         Event event = new Event()
                 .setExchange(RabbitMqEnum.A_SYSTEM_MESSAGE_BROKER.getExchange())
                 .setRoutingKey(RabbitMqEnum.A_SYSTEM_MESSAGE_BROKER.getRoutingKey())
                 .setType(MessageConstant.TOPIC_COMMENT)
                 .setFromId(user.getId())
                 .setData("entityType", commentParam.getEntityType())
-                .setData("entityId", commentParam.getEntityId());
+                .setData("postId", postId)
+                .setData("commentId", comment.getId());
         if (commentParam.getEntityType() == EntityTypeConstant.ENTITY_TYPE_POST) {
-            DiscussPost discussPost = discussPostService.getDiscussPostById(commentParam.getEntityId());
             event.setToId(discussPost.getUserId());
             // 放入Redis，后期重新更新分数
             redisService.sAdd(RedisKey.POST_SCORE_KEY, commentParam.getEntityId());
@@ -164,5 +174,10 @@ public class CommentServiceImpl implements CommentService {
         }
         messageProducer.sendMessage(event);
         return i;
+    }
+
+    @Override
+    public Comment getCommentById(Long id) {
+        return commentMapper.selectById(id);
     }
 }

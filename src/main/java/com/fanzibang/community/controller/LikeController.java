@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -23,9 +24,10 @@ public class LikeController {
     private LikeService likeService;
 
     @PostMapping
-    public CommonResult like(@Valid @Min(value = 1, message = "1-帖子；2-评论") @Max(value = 2, message = "1-帖子；2-评论") Integer entityType,
+    public CommonResult like(@Valid @NotNull @RequestParam("post_id") Long postId,
+                             @Valid @Min(value = 1, message = "1-帖子；2-评论") @Max(value = 2, message = "1-帖子；2-评论") Integer entityType,
                              @Valid @NotNull Long entityId) {
-        likeService.like(entityType, entityId);
+        likeService.like(postId, entityType, entityId);
         return CommonResult.success(null);
     }
 }
