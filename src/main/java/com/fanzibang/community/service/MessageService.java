@@ -15,4 +15,6 @@ public interface MessageService{
     List<Map<String, Object>> getFollowMessageList(Integer current, Integer size);
 
     Integer addMessage(Message message);
+
+    void publishSystemMessage(String content);
 }

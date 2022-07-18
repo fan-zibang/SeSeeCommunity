@@ -87,4 +87,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userVo.setLastLogin(lastLogin);
         return userVo;
     }
+
+    @Override
+    public List<Long> getAllUserIds() {
+        return userMapper.getAllUserIds();
+    }
 }

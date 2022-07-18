@@ -5,6 +5,8 @@ import com.fanzibang.community.dto.UserInfoParam;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.vo.UserVo;
 
+import java.util.List;
+
 public interface UserService extends IService<User> {
 
     Integer updateUserInfo(UserInfoParam userInfoParam);
@@ -12,5 +14,7 @@ public interface UserService extends IService<User> {
     Integer updateUserPassword(String oldPwd, String newPwd);
 
     UserVo getCurrentUser();
+
+    List<Long> getAllUserIds();
 
 }

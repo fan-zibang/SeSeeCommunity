@@ -7,11 +7,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fanzibang.community.constant.EntityTypeConstant;
 import com.fanzibang.community.constant.MessageConstant;
+import com.fanzibang.community.constant.RabbitMqEnum;
 import com.fanzibang.community.mapper.MessageMapper;
-import com.fanzibang.community.pojo.Comment;
-import com.fanzibang.community.pojo.DiscussPost;
-import com.fanzibang.community.pojo.Message;
-import com.fanzibang.community.pojo.User;
+import com.fanzibang.community.mq.MessageProducer;
+import com.fanzibang.community.pojo.*;
 import com.fanzibang.community.service.*;
 import com.fanzibang.community.utils.UserHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +39,20 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private FollowService followService;
 
+    @Autowired
+    private MessageProducer messageProducer;
+
     @Override
     public Integer addMessage(Message message) {
         return messageMapper.insert(message);
     }
 
+    /**
+     * 显示系统通知
+     * @param current
+     * @param size
+     * @return
+     */
     @Override
     public List<Map<String, Object>> getSystemMessageList(Integer current, Integer size) {
         List<Message> systemMessageList = getMessageList(MessageConstant.TOPIC_SYSTEM, current, size);
@@ -60,6 +68,12 @@ public class MessageServiceImpl implements MessageService {
         return systemMessageVoList;
     }
 
+    /**
+     * 显示评论通知
+     * @param current
+     * @param size
+     * @return
+     */
     @Override
     public List<Map<String, Object>> getCommentMessageList(Integer current, Integer size) {
         List<Message> commentMessageList = getMessageList(MessageConstant.TOPIC_COMMENT, current, size);
@@ -71,6 +85,12 @@ public class MessageServiceImpl implements MessageService {
         return commentMessageVoList;
     }
 
+    /**
+     * 显示关注通知
+     * @param current
+     * @param size
+     * @return
+     */
     @Override
     public List<Map<String, Object>> getFollowMessageList(Integer current, Integer size) {
         List<Message> followMessageList = getMessageList(MessageConstant.TOPIC_FOLLOW, current, size);
@@ -93,6 +113,12 @@ public class MessageServiceImpl implements MessageService {
         return followMessageVoList;
     }
 
+    /**
+     * 显示点赞通知
+     * @param current
+     * @param size
+     * @return
+     */
     @Override
     public List<Map<String, Object>> getLikeMessageList(Integer current, Integer size) {
         List<Message> likeMessageList = getMessageList(MessageConstant.TOPIC_LIKE, current, size);
@@ -145,11 +171,14 @@ public class MessageServiceImpl implements MessageService {
         return messageVo;
     }
 
-    public Long getMessageCount(Integer entityType) {
-        User user = userHolder.getUser();
-        LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Message::getType, entityType).eq(Message::getToId, user.getId());
-        return messageMapper.selectCount(queryWrapper);
+    @Override
+    public void publishSystemMessage(String content) {
+        Event event = new Event().setExchange(RabbitMqEnum.A_SYSTEM_MESSAGE_BROKER.getExchange())
+                .setRoutingKey(RabbitMqEnum.A_SYSTEM_MESSAGE_BROKER.getRoutingKey())
+                .setType(MessageConstant.TOPIC_SYSTEM)
+                .setFromId(MessageConstant.SYSTEM_USER_ID)
+                .setToId(MessageConstant.ALL_USER)
+                .setData("content", content);
+        messageProducer.sendMessage(event);
     }
-
 }

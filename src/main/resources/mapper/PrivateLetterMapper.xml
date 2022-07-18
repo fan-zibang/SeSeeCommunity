@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanzibang.community.mapper.PrivateLetterMapper">
+    <select id="getPrivateLetterList" resultType="com.fanzibang.community.pojo.PrivateLetter">
+        select id, from_id, to_id, conversation_id, content from t_private_letter
+            where id in
+                (select max(id)
+                    from t_private_letter
+                    where from_id=#{userId} or to_id=#{userId}
+                    group by conversation_id)
+            limit #{current}, #{size};
+    </select>
+
+    <update id="updateStatus">
+        update t_private_letter
+        set status=#{status}
+        where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

@@ -6,12 +6,15 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fanzibang.community.constant.MessageConstant;
 import com.fanzibang.community.constant.RabbitMqEnum;
 import com.fanzibang.community.constant.RedisKey;
+import com.fanzibang.community.mapper.PrivateLetterMapper;
 import com.fanzibang.community.mq.MessageProducer;
 import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
+import com.fanzibang.community.pojo.PrivateLetter;
 import com.fanzibang.community.service.DiscussPostService;
 import com.fanzibang.community.service.RedisService;
 import com.fanzibang.community.utils.JwtTokenUtil;
@@ -25,6 +28,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @SpringBootTest
 class CommunityApplicationTests {
 
@@ -36,6 +43,9 @@ class CommunityApplicationTests {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private PrivateLetterMapper privateLetterMapper;
 
     @Autowired
     private MessageProducer messageProducer;
@@ -122,6 +132,18 @@ class CommunityApplicationTests {
         Snowflake snowflake = IdUtil.createSnowflake(1,1);
         long id = snowflake.nextId();
         System.out.println(id);
+    }
+
+    @Test
+    void test08() {
+        LambdaQueryWrapper<PrivateLetter> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(PrivateLetter::getConversationId, "1_13")
+                .orderByAsc(PrivateLetter::getCreateTime);
+        List<PrivateLetter> privateLetterList = privateLetterMapper.selectList(queryWrapper);
+        System.out.println(privateLetterList);
+        List<Long> collect = privateLetterList.stream().filter(letter -> letter.getStatus() == 0 && letter.getToId() == 1)
+                .map(PrivateLetter::getId).collect(Collectors.toList());
+        System.out.println(collect);
 
     }
 }

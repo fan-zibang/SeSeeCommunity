@@ -23,11 +23,6 @@ public class QiniuUtil {
     private static final Logger logger = LoggerFactory.getLogger(QiniuUtil.class);
 
     /**
-     * 七牛域名domain
-     */
-    @Value("${oss.qiniu.url}")
-    private String url;
-    /**
      * 七牛ACCESS_KEY
      */
     @Value("${oss.qiniu.access-key}")
@@ -47,6 +42,7 @@ public class QiniuUtil {
         //构造一个带指定 Region 对象的配置类
         Configuration cfg = new Configuration(Region.huanan());
         UploadManager uploadManager = new UploadManager(cfg);
+
         try {
             byte[] uploadBytes = file.getBytes();
             Auth auth = Auth.create(accessKey, secretKey);
@@ -66,6 +62,7 @@ public class QiniuUtil {
         Configuration cfg = new Configuration(Region.huanan());
         Auth auth = Auth.create(accessKey, secretKey);
         BucketManager bucketManager = new BucketManager(auth, cfg);
+
         try {
             bucketManager.delete(bucket, filename);
             return true;

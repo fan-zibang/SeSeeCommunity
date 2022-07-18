@@ -23,7 +23,7 @@ public class UploadServiceImpl implements UploadService {
     private String url;
 
     @Override
-    public String uploadImage(MultipartFile file) {
+    public String upload(MultipartFile file, Integer type) {
         String imgUrl = null;
         if (file.isEmpty()) {
             Asserts.fail(ReturnCode.RC1003);
@@ -34,6 +34,10 @@ public class UploadServiceImpl implements UploadService {
             // 唯一的文件名称
             String filename = UUID.randomUUID() + "." + FileUtil.extName(originalFilename);
             // 上传文件
+            switch (type) {
+                case 1: filename = "avatar/" + filename; break;
+                case 2: filename = "discusspost/" + filename; break;
+            }
             boolean isUpload = qiniuUtil.upload(file, filename);
             if (!isUpload) {
                 Asserts.fail(ReturnCode.RC1001);
@@ -43,11 +47,14 @@ public class UploadServiceImpl implements UploadService {
             Asserts.fail(ReturnCode.RC1004);
         }
         return imgUrl;
-
     }
 
     @Override
-    public String deleteImage(String filename) {
+    public String delete(String filename, Integer type) {
+        switch (type) {
+            case 1: filename = "avatar/" + filename; break;
+            case 2: filename = "discusspost/" + filename; break;
+        }
         boolean isDelete = qiniuUtil.delete(filename);
         if (!isDelete) {
             Asserts.fail(ReturnCode.RC1002);

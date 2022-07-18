@@ -4,6 +4,8 @@ public class MessageConstant {
 
     // 系统管理员id
     public static final long SYSTEM_USER_ID = 1;
+    // 发送给所有人
+    public static final long ALL_USER = 0;
     // 系统通知
     public static final int TOPIC_SYSTEM = 0;
     // 评论

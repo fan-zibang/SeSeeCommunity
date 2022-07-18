@@ -6,16 +6,16 @@ spring:
     name: community
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://43.138.163.75:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: fzb.0226
+    password: community
     druid:
       initial-size: 5
       max-active: 20
       max-wait: 6000
       min-idle: 1
   redis:
-    host: localhost # Redis服务器地址
+    host: 43.138.163.75 # Redis服务器地址
     database: 0 # Redis数据库索引（默认为0）
     port: 6379 # Redis服务器连接端口
     password: # Redis服务器连接密码（默认为空）
@@ -32,7 +32,7 @@ spring:
     password: fxbizarhlbdebjcf # 授权码
     port: 587
   rabbitmq:
-    host: localhost # rabbitmq的连接地址
+    host: 43.138.163.75 # rabbitmq的连接地址
     port: 5672 # rabbitmq的连接端口号
     virtual-host: /community # rabbitmq的虚拟host
     username: community

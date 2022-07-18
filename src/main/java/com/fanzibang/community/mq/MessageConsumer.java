@@ -3,16 +3,20 @@ package com.fanzibang.community.mq;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.fanzibang.community.constant.MessageConstant;
 import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
 import com.fanzibang.community.pojo.Message;
 import com.fanzibang.community.service.DiscussPostService;
 import com.fanzibang.community.service.MessageService;
+import com.fanzibang.community.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 
 @Component
@@ -26,6 +30,9 @@ public class MessageConsumer {
     @Autowired
     private DiscussPostService discussPostService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * 消费管理员消息、评论、关注、点赞事件
      */
@@ -37,17 +44,21 @@ public class MessageConsumer {
             logger.error("消息内容为空");
             return;
         }
-        // 发送系统通知
-        Message message = new Message();
-        message.setType(event.getType());
-        message.setFromId(event.getFromId());
-        message.setToId(event.getToId());
-        if (ObjectUtil.isNotEmpty(event.getData())) {
-            message.setContent(JSONUtil.toJsonStr(event.getData()));
+
+        // 是否是群发消息
+        if (event.getToId() == MessageConstant.ALL_USER) {
+            List<Long> ids = userService.getAllUserIds();
+            for (Long id : ids) {
+                event.setToId(id);
+                Message message = copy(event);
+                messageService.addMessage(message);
+            }
+        } else {
+            Message message = copy(event);
+            // 发送系统通知
+            messageService.addMessage(message);
         }
-        message.setStatus(0);
-        message.setCreateTime(System.currentTimeMillis());
-        messageService.addMessage(message);
+
     }
 
     /**
@@ -66,7 +77,6 @@ public class MessageConsumer {
             logger.error("postId为空，es存取帖子失败");
             return;
         }
-
         Long postId = Long.valueOf(event.getData().get("postId").toString());
 
 
@@ -97,5 +107,17 @@ public class MessageConsumer {
 
     }
 
+    private Message copy(Event event) {
+        Message message = new Message();
+        message.setType(event.getType());
+        message.setFromId(event.getFromId());
+        message.setToId(event.getToId());
+        if (ObjectUtil.isNotEmpty(event.getData())) {
+            message.setContent(JSONUtil.toJsonStr(event.getData()));
+        }
+        message.setStatus(0);
+        message.setCreateTime(System.currentTimeMillis());
+        return message;
+    }
 
 }

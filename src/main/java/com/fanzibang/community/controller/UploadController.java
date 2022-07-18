@@ -8,24 +8,30 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
 @RestController
-@RequestMapping("/upload")
+@RequestMapping("/file")
 @Validated
 public class UploadController {
 
     @Autowired
     private UploadService uploadService;
 
-    @PostMapping("/image")
-    public String image(@RequestParam("image") MultipartFile file) {
-         return uploadService.uploadImage(file);
+    @PostMapping("/img")
+    public String upload(@RequestParam("img") MultipartFile file,
+                         @Valid @Min(value = 1, message = "上传类型：1-头像；2-帖子图片")
+                         @Max(value = 2,message = "上传类型：1-头像；2-帖子图片") Integer type) {
+         return uploadService.upload(file, type);
     }
 
-    @DeleteMapping("/image")
-    public CommonResult image(@Valid @NotEmpty String filename) {
-        String data = uploadService.deleteImage(filename);
+    @DeleteMapping("/img")
+    public CommonResult delete(@Valid @NotEmpty String filename,
+                               @Valid @Min(value = 1, message = "上传类型：1-头像；2-帖子图片")
+                               @Max(value = 2,message = "上传类型：1-头像；2-帖子图片") Integer type) {
+        String data = uploadService.delete(filename, type);
         return CommonResult.success(data);
     }
 }

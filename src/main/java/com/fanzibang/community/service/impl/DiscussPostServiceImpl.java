@@ -63,7 +63,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Value("${caffeine.discussPost.max-size}")
     private int maxSize;
 
-    @Value("${caffeine.discussPost.expire-seconds}")
+    @Value("${caffeine.discussPost.expire}")
     private int expireSeconds;
 
     // 热帖列表的本地缓存
@@ -79,7 +79,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     public void init() {
         postListCache = Caffeine.newBuilder()
                 .maximumSize(maxSize)
-                .expireAfterWrite(expireSeconds, TimeUnit.SECONDS)
+                .expireAfterWrite(expireSeconds, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<DiscussPostDetailVo>>() {
                     @Override
                     public @Nullable List<DiscussPostDetailVo> load(@NonNull String key) throws Exception {
@@ -247,13 +247,13 @@ public class DiscussPostServiceImpl implements DiscussPostService {
             case 2: BeanUtil.copyProperties(discussPost, discussPostDetailVo); break;
         }
         User user = userService.getById(discussPost.getUserId());
-        if (!ObjectUtil.isEmpty(user)) {
+        if (ObjectUtil.isNotNull(user)) {
             discussPostDetailVo.setAuthor(user.getNickname());
         }
         Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());
         discussPostDetailVo.setLikeCount(likeCount);
         Topic topic = topicService.getTopicById(discussPost.getTopicId());
-        if (!ObjectUtil.isEmpty(topic)) {
+        if (ObjectUtil.isNotNull(topic)) {
             discussPostDetailVo.setPlate(topic.getName());
         }
         String createTime = DateUtil.date(discussPost.getCreateTime()).toString("yyyy-MM-dd HH:mm");
