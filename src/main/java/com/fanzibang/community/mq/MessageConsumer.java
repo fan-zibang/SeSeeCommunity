@@ -8,6 +8,7 @@ import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Event;
 import com.fanzibang.community.pojo.Message;
 import com.fanzibang.community.service.DiscussPostService;
+import com.fanzibang.community.service.EsDiscussPostService;
 import com.fanzibang.community.service.MessageService;
 import com.fanzibang.community.service.UserService;
 import org.slf4j.Logger;
@@ -32,6 +33,9 @@ public class MessageConsumer {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EsDiscussPostService esDiscussPostService;
 
     /**
      * 消费管理员消息、评论、关注、点赞事件
@@ -78,11 +82,12 @@ public class MessageConsumer {
             return;
         }
         Long postId = Long.valueOf(event.getData().get("postId").toString());
-
-
         DiscussPost discussPost = discussPostService.getDiscussPostById(postId);
         // TODO 存入 Elasticsearch 服务器
-
+        DiscussPost post = esDiscussPostService.save(discussPost);
+        if (ObjectUtil.isNull(post)) {
+            logger.error("帖子存入es服务器失败");
+        }
     }
 
     /**

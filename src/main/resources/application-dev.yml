@@ -38,6 +38,13 @@ spring:
     username: community
     password: community
     publisher-confirm: true # 如果对异步消息需要回调必须设置为true
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+  elasticsearch:
+    rest:
+      uris: localhost:9200
 
   mvc:
     throw-exception-if-no-handler-found: true # 出现错误时, 直接抛出异常
@@ -77,3 +84,5 @@ caffeine:
   discussPost:
     max-size: 15
     expire: 1440
+
+

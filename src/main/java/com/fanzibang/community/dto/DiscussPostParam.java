@@ -4,6 +4,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class DiscussPostParam {
@@ -13,7 +14,7 @@ public class DiscussPostParam {
     private String title;
     @NotEmpty
     private String content;
-    @NotEmpty
+    @NotNull
     private Integer topicId;
 
 }
