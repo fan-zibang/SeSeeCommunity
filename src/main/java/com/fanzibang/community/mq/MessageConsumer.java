@@ -83,7 +83,7 @@ public class MessageConsumer {
         }
         Long postId = Long.valueOf(event.getData().get("postId").toString());
         DiscussPost discussPost = discussPostService.getDiscussPostById(postId);
-        // TODO 存入 Elasticsearch 服务器
+        // 存入 Elasticsearch 服务器
         DiscussPost post = esDiscussPostService.save(discussPost);
         if (ObjectUtil.isNull(post)) {
             logger.error("帖子存入es服务器失败");
@@ -106,9 +106,8 @@ public class MessageConsumer {
             logger.error("postId为空，es删除帖子失败");
             return;
         }
-
-        // TODO 更新 Elasticsearch 服务器
-
+        // 更新 Elasticsearch 服务器
+        esDiscussPostService.deleteById(postId);
 
     }
 

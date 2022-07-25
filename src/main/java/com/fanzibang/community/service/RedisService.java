@@ -1,5 +1,6 @@
 package com.fanzibang.community.service;
 
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.SessionCallback;
 
 import java.util.Map;
@@ -11,6 +12,8 @@ import java.util.Set;
 public interface RedisService {
 
     <T> T execute(SessionCallback<T> session);
+
+    <T> T execute(RedisCallback<T> action);
 
     void set(String key, Object value);
 
@@ -125,5 +128,11 @@ public interface RedisService {
     Long zRemove(String key, Object... value);
 
     Long zCard(String key);
+
+    Long pfAdd(String key, Object... value);
+
+    Long pfCount(String... key);
+
+    Boolean setBit(String key, long offset, boolean value);
 
 }

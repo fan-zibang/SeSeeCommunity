@@ -1,10 +1,12 @@
 package com.fanzibang.community.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fanzibang.community.constant.*;
 import com.fanzibang.community.dto.DiscussPostParam;
@@ -27,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.BoundSetOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -58,7 +62,16 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     private RedisService redisService;
 
     @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private EsDiscussPostService esDiscussPostService;
+
+    @Autowired
     private UserHolder userHolder;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Value("${caffeine.discussPost.max-size}")
     private int maxSize;
@@ -225,6 +238,48 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         return discussPostMapper.selectOne(queryWrapper);
     }
 
+    @Override
+    public void refreshPostScore() {
+        BoundSetOperations operations = redisTemplate.boundSetOps(RedisKey.POST_SCORE_KEY);
+        if (operations.size() == 0) {
+            logger.info("任务取消，没有需要刷新的任务");
+        }
+        while(operations.size() > 0) {
+            Long postId = Long.valueOf(operations.pop().toString());
+            DiscussPost discussPost = this.getDiscussPostById(postId);
+            if (ObjectUtil.isNull(discussPost)) {
+                logger.error("该帖子不存在：{}", postId);
+                return ;
+            }
+            boolean isWonderful = discussPost.getType() == 1;
+            Long commentCount = discussPost.getCommentCount();
+            Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, postId);
+            Long userLikeCount = likeService.getUserLikeCount(discussPost.getUserId());
+            Long fansCount = followService.getFansCount(discussPost.getUserId());
+            /**
+             *  score = H + I / (T + 1) ^ G
+             *  帖子的热度（分数）= 内容的质量 + 初始质量 / (文章发布以来的时长 + 1) ^ 衰减参数
+             *  内容的质量：一个帖子的是否是精华帖、评论数、点赞数加权求和的数值
+             *  初始质量：与作者的影响力有关，作者的影响力和他的粉丝量和获得总点赞量有关
+             *  文章发布以来的时长：文章的热度应该随着时间推移慢慢降低
+             *  衰减参数：决定热度随时间降低的快慢
+             */
+            double h = (isWonderful ? 60 : 0) + commentCount * 25 + likeCount * 15;
+            double i = fansCount * 60 + userLikeCount * 40;
+            long t = DateUtil.between(DateUtil.date(discussPost.getCreateTime()), DateUtil.date(System.currentTimeMillis()), DateUnit.DAY);
+            double score = (h + i) / Math.pow((t + 1), 1.2);
+            logger.info("帖子：{}，分数：{}",discussPost.getId(), score);
+            // 更新数据库帖子分数
+            LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.set(DiscussPost::getScore, score).eq(DiscussPost::getId, discussPost.getId());
+            discussPostMapper.update(null,updateWrapper);
+            // 更新es服务器数据
+            discussPost.setScore(score);
+            esDiscussPostService.save(discussPost);
+        }
+
+    }
+
     private List<DiscussPostDetailVo> copyList(List<DiscussPost> discussPostList) {
         ArrayList<DiscussPostDetailVo> discussPostDetailVoList = new ArrayList<>();
         for (DiscussPost discussPost : discussPostList) {
@@ -248,6 +303,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         }
         User user = userService.getById(discussPost.getUserId());
         if (ObjectUtil.isNotNull(user)) {
+            discussPostDetailVo.setAuthorId(user.getId());
             discussPostDetailVo.setAuthor(user.getNickname());
         }
         Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());

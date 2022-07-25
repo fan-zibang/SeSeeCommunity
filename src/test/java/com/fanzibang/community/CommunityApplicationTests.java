@@ -2,6 +2,7 @@ package com.fanzibang.community;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
@@ -145,5 +146,10 @@ class CommunityApplicationTests {
                 .map(PrivateLetter::getId).collect(Collectors.toList());
         System.out.println(collect);
 
+    }
+
+    @Test
+    void test09() {
+        System.out.println(DateUtil.between(DateUtil.date(1658315763611L), DateUtil.date(System.currentTimeMillis()), DateUnit.DAY));
     }
 }

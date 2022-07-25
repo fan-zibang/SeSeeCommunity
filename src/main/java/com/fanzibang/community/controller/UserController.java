@@ -1,9 +1,8 @@
 package com.fanzibang.community.controller;
 
 import com.fanzibang.community.dto.UserInfoParam;
-import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.service.UserService;
-import com.fanzibang.community.utils.UserHolder;
+import com.fanzibang.community.vo.UserDetailVo;
 import com.fanzibang.community.vo.UserVo;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
@@ -23,8 +22,13 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public UserVo getCurrentUser() {
-        return userService.getCurrentUser();
+    public UserVo getCurrentUserDetails() {
+        return userService.getCurrentUserDetails();
+    }
+
+    @GetMapping("/{userId}")
+    public UserDetailVo getUserDetails(@PathVariable("userId") Long userId) {
+        return userService.getUserDetails(userId);
     }
 
     @PutMapping

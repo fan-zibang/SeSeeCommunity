@@ -52,6 +52,13 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private DiscussPostService discussPostService;
 
+    /**
+     * 获取评论列表
+     * @param postId 所属文章id
+     * @param current
+     * @param size
+     * @return
+     */
     @Override
     public List<Map<String, Object>> getCommentList(Long postId, Integer current, Integer size) {
         Page<Comment> page = new Page<>(1, 10,false);
@@ -71,19 +78,20 @@ public class CommentServiceImpl implements CommentService {
                 Map<String, Object> commentVo = new HashMap<>();
                 commentVo.put("id", comment.getId());
                 User commentUser = userService.getById(comment.getUserId());
-                String nickname = !ObjectUtil.isEmpty(commentUser) ? commentUser.getNickname() : null;
+                String nickname = ObjectUtil.isNotNull(commentUser) ? commentUser.getNickname() : null;
                 commentVo.put("nickname", nickname);
 
                 commentVo.put("content", comment.getContent());
                 commentVo.put("like_count", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId()));
                 // 该用户是否对该评论点赞
                 User user = userHolder.getUser();
-                if (ObjectUtil.isEmpty(user)) {
+                if (ObjectUtil.isNull(user)) {
                     commentVo.put("is_like", false);
                 }else {
                     Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId(), user.getId());
                     commentVo.put("is_like", like);
                 }
+                commentVo.put("is_show", false);
                 // 封装每个评论对应的回复及其相关信息
                 List<Map<String, Object>> replyCommentVoList = new ArrayList<>();
                 LambdaQueryWrapper<Comment> replyQueryWrapper = new LambdaQueryWrapper<>();
@@ -112,6 +120,7 @@ public class CommentServiceImpl implements CommentService {
                         replyCommentVo.put("is_like", like);
                     }
                     replyCommentVo.put("like_count", likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId()));
+                    commentVo.put("is_show", false);
                     replyCommentVoList.add(replyCommentVo);
                 }
                 commentVo.put("reply_comment_list",replyCommentVoList);

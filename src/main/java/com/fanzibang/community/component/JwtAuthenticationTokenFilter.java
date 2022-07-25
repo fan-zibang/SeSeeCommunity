@@ -1,4 +1,4 @@
-package com.fanzibang.community.handler;
+package com.fanzibang.community.component;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.fanzibang.community.constant.RedisKey;
@@ -17,7 +17,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * JWT登录授权过滤器

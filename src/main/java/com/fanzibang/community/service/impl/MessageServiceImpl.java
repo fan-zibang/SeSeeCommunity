@@ -168,6 +168,7 @@ public class MessageServiceImpl implements MessageService {
             String commentContent = ObjectUtil.isNotNull(comment) ? comment.getContent() : null;
             messageVo.put("comment_content", commentContent);
         }
+        messageVo.put("create_time", message.getCreateTime());
         return messageVo;
     }
 

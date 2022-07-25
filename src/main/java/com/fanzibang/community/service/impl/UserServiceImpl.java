@@ -2,17 +2,22 @@ package com.fanzibang.community.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fanzibang.community.constant.RedisKey;
 import com.fanzibang.community.constant.ReturnCode;
 import com.fanzibang.community.dto.UserInfoParam;
 import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.UserMapper;
 import com.fanzibang.community.pojo.User;
+import com.fanzibang.community.service.FollowService;
+import com.fanzibang.community.service.LikeService;
 import com.fanzibang.community.service.LoginService;
 import com.fanzibang.community.service.UserService;
 import com.fanzibang.community.utils.UserHolder;
+import com.fanzibang.community.vo.UserDetailVo;
 import com.fanzibang.community.vo.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +31,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private LoginService loginService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @Autowired
     private UserMapper userMapper;
@@ -77,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public UserVo getCurrentUser() {
+    public UserVo getCurrentUserDetails() {
         User user = userHolder.getUser();
         UserVo userVo = new UserVo();
         BeanUtil.copyProperties(user, userVo);
@@ -86,6 +97,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String lastLogin = DateUtil.date(user.getLastLogin()).toString("yyyy-MM-dd HH:mm");
         userVo.setLastLogin(lastLogin);
         return userVo;
+    }
+
+    @Override
+    public UserDetailVo getUserDetails(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (ObjectUtil.isNull(user)) {
+            Asserts.fail(ReturnCode.RC211);
+        }
+        UserDetailVo userDetailVo = new UserDetailVo();
+        BeanUtil.copyProperties(user, userDetailVo);
+        userDetailVo.setUserLikeCount(likeService.getUserLikeCount(userId));
+        userDetailVo.setFansCount(followService.getFansCount(userId));
+        userDetailVo.setFollowerCount(followService.getFollowerCount(userId));
+        String createTime = DateUtil.date(user.getCreateTime()).toString("yyyy-MM-dd");
+        userDetailVo.setCreateTime(createTime);
+        return userDetailVo;
     }
 
     @Override

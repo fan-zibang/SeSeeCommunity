@@ -2,6 +2,7 @@ package com.fanzibang.community.service.impl;
 
 import com.fanzibang.community.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 
@@ -20,6 +21,11 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public <T> T execute(SessionCallback<T> session) {
         return redisTemplate.execute(session);
+    }
+
+    @Override
+    public <T> T execute(RedisCallback<T> action) {
+        return redisTemplate.execute(action);
     }
 
     @Override
@@ -162,6 +168,21 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Long zCard(String key) {
         return redisTemplate.opsForZSet().zCard(key);
+    }
+
+    @Override
+    public Long pfAdd(String key, Object... value) {
+        return redisTemplate.opsForHyperLogLog().add(key, value);
+    }
+
+    @Override
+    public Long pfCount(String... key) {
+        return redisTemplate.opsForHyperLogLog().size(key);
+    }
+
+    @Override
+    public Boolean setBit(String key, long offset, boolean value) {
+        return redisTemplate.opsForValue().setBit(key, offset, value);
     }
 
 }

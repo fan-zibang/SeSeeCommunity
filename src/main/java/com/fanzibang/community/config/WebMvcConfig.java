@@ -1,11 +1,23 @@
 package com.fanzibang.community.config;
 
+import com.fanzibang.community.component.DataInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
+//    @Autowired
+//    private DataInterceptor dataInterceptor;
+
+    @Bean
+    public DataInterceptor dataInterceptor() {
+        return new DataInterceptor();
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -21,5 +33,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 // 跨域允许时间
                 .maxAge(3600);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(dataInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns("/*.html", "/favicon.ico",
+                        "/**/*.html", "/**/*.css", "/**/*.js", "/file");
     }
 }

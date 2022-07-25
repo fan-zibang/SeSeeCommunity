@@ -1,8 +1,8 @@
 package com.fanzibang.community.config;
 
-import com.fanzibang.community.handler.JwtAuthenticationTokenFilter;
-import com.fanzibang.community.handler.RestAuthenticationEntryPoint;
-import com.fanzibang.community.handler.RestfulAccessDeniedHandler;
+import com.fanzibang.community.component.JwtAuthenticationTokenFilter;
+import com.fanzibang.community.component.RestAuthenticationEntryPoint;
+import com.fanzibang.community.component.RestfulAccessDeniedHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/discussPost/**",
                         "/comment/{postId}",
                         "/follow/**",
-                        "/esDiscussPost/**").permitAll() // 对登录注册接口允许匿名访问
+                        "/esDiscussPost/**",
+                        "/user/{userId}").permitAll() // 对登录注册接口允许匿名访问
                 .antMatchers(HttpMethod.OPTIONS).permitAll() // 跨域请求会先进行一次options请求
                 .anyRequest().authenticated(); // 除上面外的所有请求请求全部需要鉴权认证
         // 禁用缓存

@@ -1,4 +1,4 @@
-package com.fanzibang.community.handler;
+package com.fanzibang.community.component;
 
 import cn.hutool.json.JSONUtil;
 import com.fanzibang.community.constant.ReturnCode;

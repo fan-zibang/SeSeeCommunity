@@ -9,6 +9,8 @@ public class DiscussPostDetailVo {
 
     // 帖子id
     private Long id;
+    // 作者id
+    private Long authorId;
     // 作者
     private String author;
     // 帖子标题

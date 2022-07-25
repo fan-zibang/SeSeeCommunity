@@ -10,4 +10,5 @@ public interface EsDiscussPostService {
 
     Page<DiscussPostDetailVo> search(String keyword, Integer current, Integer size, Integer topicId,Integer sort);
 
+    void deleteById(Long postId);
 }

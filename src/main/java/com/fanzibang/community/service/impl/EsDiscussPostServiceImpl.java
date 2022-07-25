@@ -56,6 +56,7 @@ public class EsDiscussPostServiceImpl implements EsDiscussPostService {
         return esDiscussPostRepository.save(discussPost);
     }
 
+    @Override
     public void deleteById(Long id) {
         esDiscussPostRepository.deleteById(id);
     }

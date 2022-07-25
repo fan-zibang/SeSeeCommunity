@@ -47,14 +47,14 @@ public class LikeServiceImpl implements LikeService {
     @Override
     public Boolean isLike(Integer entityType, Long entityId, Long userId) {
         // 1-帖子 2-评论
-        String suffixKey = entityType == 1 ? "post:" : "comment:";
+        String suffixKey = entityType == EntityTypeConstant.ENTITY_TYPE_POST ? "post:" : "comment:";
         return redisService.sIsMember(RedisKey.LIKE_KEY + suffixKey + entityId, userId);
     }
 
     @Override
     public Long getLikeCount(Integer entityType, Long entityId) {
         // 1-帖子 2-评论
-        String suffixKey = entityType == 1 ? "post:" : "comment:";
+        String suffixKey = entityType == EntityTypeConstant.ENTITY_TYPE_POST ? "post:" : "comment:";
         return redisService.sSize(RedisKey.LIKE_KEY + suffixKey + entityId);
     }
 
@@ -124,5 +124,13 @@ public class LikeServiceImpl implements LikeService {
         }
     }
 
-
+    /**
+     * 获取用户的总点赞数
+     * @param uid
+     * @return
+     */
+    public Long getUserLikeCount(Long uid) {
+        Object count = redisService.get(RedisKey.USER_LIKE_KEY + uid);
+        return Long.valueOf(count.toString());
+    }
 }

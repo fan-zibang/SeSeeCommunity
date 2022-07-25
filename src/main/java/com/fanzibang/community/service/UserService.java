@@ -3,6 +3,7 @@ package com.fanzibang.community.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fanzibang.community.dto.UserInfoParam;
 import com.fanzibang.community.pojo.User;
+import com.fanzibang.community.vo.UserDetailVo;
 import com.fanzibang.community.vo.UserVo;
 
 import java.util.List;
@@ -13,8 +14,9 @@ public interface UserService extends IService<User> {
 
     Integer updateUserPassword(String oldPwd, String newPwd);
 
-    UserVo getCurrentUser();
+    UserVo getCurrentUserDetails();
 
     List<Long> getAllUserIds();
 
+    UserDetailVo getUserDetails(Long userId);
 }

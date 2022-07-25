@@ -19,4 +19,6 @@ public interface DiscussPostService {
 
     Long getDiscussPostCount(Long userId);
 
+    void refreshPostScore();
+
 }

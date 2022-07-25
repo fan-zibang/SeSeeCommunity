@@ -16,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -92,6 +93,18 @@ public class GlobalExceptionHandler {
     public CommonResult handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         logger.info("上传文件错误：{}", e.getMessage(), e);
         return CommonResult.fail(ReturnCode.RC1005);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public CommonResult handleIllegalArgumentException(IllegalArgumentException e) {
+        logger.info("参数校验错误：{}", e.getMessage(), e);
+        return CommonResult.fail(e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public CommonResult handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        logger.info(e.getMessage());
+        return CommonResult.fail(ReturnCode.RC400);
     }
 
     /**
