@@ -9,10 +9,7 @@ import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Topic;
 import com.fanzibang.community.pojo.User;
 import com.fanzibang.community.repository.EsDiscussPostRepository;
-import com.fanzibang.community.service.EsDiscussPostService;
-import com.fanzibang.community.service.LikeService;
-import com.fanzibang.community.service.TopicService;
-import com.fanzibang.community.service.UserService;
+import com.fanzibang.community.service.*;
 import com.fanzibang.community.vo.DiscussPostDetailVo;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -51,6 +48,9 @@ public class EsDiscussPostServiceImpl implements EsDiscussPostService {
     @Autowired
     private TopicService topicService;
 
+    @Autowired
+    private DataService dataService;
+
     @Override
     public DiscussPost save(DiscussPost discussPost) {
         return esDiscussPostRepository.save(discussPost);
@@ -63,6 +63,8 @@ public class EsDiscussPostServiceImpl implements EsDiscussPostService {
 
     @Override
     public Page<DiscussPostDetailVo> search(String keyword, Integer current, Integer size, Integer topicId,Integer sort) {
+        // 热词统计
+        dataService.setHotWord(keyword);
         Pageable pageable = null;
         if (ObjectUtil.isNotNull(current) && ObjectUtil.isNotNull(size)) {
             pageable = PageRequest.of(current-1, size);

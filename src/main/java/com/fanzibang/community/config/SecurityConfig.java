@@ -54,9 +54,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/activation/**/**",
                         "/discussPost/**",
                         "/comment/{postId}",
+                        "/comment/count/{postId}",
                         "/follow/**",
                         "/esDiscussPost/**",
-                        "/user/{userId}").permitAll() // 对登录注册接口允许匿名访问
+                        "/user/{userId}",
+                        "/data/hotWord").permitAll() // 对这些接口允许匿名访问
                 .antMatchers(HttpMethod.OPTIONS).permitAll() // 跨域请求会先进行一次options请求
                 .anyRequest().authenticated(); // 除上面外的所有请求请求全部需要鉴权认证
         // 禁用缓存

@@ -63,11 +63,11 @@ public class LoginServiceImpl implements LoginService {
 
         // 账号已注册已激活
         User user = userMapper.selectOne(new LambdaQueryWrapper<>(User.class).eq(User::getEmail, email));
-        if (!ObjectUtil.isEmpty(user) && user.getStatus() == 1) {
+        if (ObjectUtil.isNotNull(user) && user.getStatus() == 1) {
             Asserts.fail(ReturnCode.RC208);
         }
         // 账号已注册未激活
-        if (!ObjectUtil.isEmpty(user) && user.getStatus() == 0) {
+        if (ObjectUtil.isNotNull(user) && user.getStatus() == 0) {
             sendEmailCodeToUser(user.getId(), email);
             return user.getId();
         }
@@ -105,7 +105,7 @@ public class LoginServiceImpl implements LoginService {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(User::getId, User::getStatus).eq(User::getId, userId);
         User user = userMapper.selectOne(queryWrapper);
-        if (ObjectUtil.isEmpty(user)) {
+        if (ObjectUtil.isNull(user)) {
             Asserts.fail(ReturnCode.RC211);
         }
         if (user.getStatus() == 1) {

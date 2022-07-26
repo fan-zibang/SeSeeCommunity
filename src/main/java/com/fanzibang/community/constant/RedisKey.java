@@ -26,4 +26,6 @@ public class RedisKey {
     public static final String DATA_UV_KEY = "data:uv:";
     // 统计DAU
     public static final String DATA_DAU_KEY = "data:dau:";
+    // 统计热词
+    public static final String DATA_HOTWORD_KEY = "data:hotword";
 }

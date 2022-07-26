@@ -132,7 +132,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
              return postListCache.get(current + ":" + size);
         }
         Page<DiscussPost> page = new Page<>(1, 10, false); // 默认 current-1，size-10
-        if (!ObjectUtil.isEmpty(current) && !ObjectUtil.isEmpty(size)) {
+        if (ObjectUtil.isNotNull(current) && ObjectUtil.isNotNull(size)) {
             page.setCurrent(current).setSize(size).setSearchCount(false);
         }
         LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper<>();
@@ -164,13 +164,13 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Override
     public DiscussPostDetailVo getDiscussPostDetail(Long id) {
         DiscussPost post = getDiscussPostById(id);
-        if (ObjectUtil.isEmpty(post)) {
+        if (ObjectUtil.isNull(post)) {
             Asserts.fail(ReturnCode.RC301);
         }
         DiscussPostDetailVo discussPostDetailVo = copy(post,2);
         // 该用户是否对该帖子点赞
         User user = userHolder.getUser();
-        if (ObjectUtil.isEmpty(user)) {
+        if (ObjectUtil.isNull(user)) {
             discussPostDetailVo.setIsLike(false);
         }else {
             Boolean isLike = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_POST, id, user.getId());
@@ -182,7 +182,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     @Override
     public int publishDiscussPost(DiscussPostParam discussPostParam) {
         User user = userHolder.getUser();
-        if (ObjectUtil.isEmpty(user)) {
+        if (ObjectUtil.isNull(user)) {
             Asserts.fail(ReturnCode.RC205);
         }
         DiscussPost discussPost = new DiscussPost();

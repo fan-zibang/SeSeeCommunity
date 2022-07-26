@@ -13,4 +13,5 @@ public interface CommentService {
 
     Comment getCommentById(Long id);
 
+    Map<String, Object> getCommentCount(Long postId);
 }

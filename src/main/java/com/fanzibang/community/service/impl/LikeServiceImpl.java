@@ -1,10 +1,7 @@
 package com.fanzibang.community.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.fanzibang.community.constant.*;
 import com.fanzibang.community.exception.ApiException;
-import com.fanzibang.community.mapper.CommentMapper;
-import com.fanzibang.community.mapper.DiscussPostMapper;
 import com.fanzibang.community.mq.MessageProducer;
 import com.fanzibang.community.pojo.Comment;
 import com.fanzibang.community.pojo.DiscussPost;
@@ -131,6 +128,7 @@ public class LikeServiceImpl implements LikeService {
      */
     public Long getUserLikeCount(Long uid) {
         Object count = redisService.get(RedisKey.USER_LIKE_KEY + uid);
+        count = Optional.ofNullable(count).orElse(0L);
         return Long.valueOf(count.toString());
     }
 }

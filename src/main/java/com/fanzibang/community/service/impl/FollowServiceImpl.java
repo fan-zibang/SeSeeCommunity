@@ -150,11 +150,11 @@ public class FollowServiceImpl implements FollowService {
         for (Integer targetUserId : targetUserIds) {
             UserFollowVo userFollowVo = new UserFollowVo();
             User targetUser = userService.getById(targetUserId);
-            if (!ObjectUtil.isNull(targetUser)) {
+            if (ObjectUtil.isNotNull(targetUser)) {
                 BeanUtil.copyProperties(targetUser, userFollowVo);
             }
             User currentUser = userHolder.getUser();
-            if (!ObjectUtil.isNull(currentUser)) {
+            if (ObjectUtil.isNotNull(currentUser)) {
                 Boolean follow = isFollow(EntityTypeConstant.ENTITY_TYPE_USER, targetUserId.longValue());
                 userFollowVo.setFollow(follow);
             } else {

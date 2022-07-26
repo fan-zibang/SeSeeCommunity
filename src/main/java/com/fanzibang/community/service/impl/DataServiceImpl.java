@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.fanzibang.community.constant.RedisKey;
 import com.fanzibang.community.service.DataService;
 import com.fanzibang.community.service.RedisService;
+import com.hankcs.hanlp.HanLP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -13,10 +14,8 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DataServiceImpl implements DataService {
@@ -34,6 +33,23 @@ public class DataServiceImpl implements DataService {
     public Boolean setDAU(Long id) {
         String date = DateUtil.date(new Date()).toString("yyyy-MM-dd");
         return redisService.setBit(RedisKey.DATA_DAU_KEY + date, id, true);
+    }
+
+    @Override
+    public void setHotWord(String keyword) {
+        // 使用 HanLP 提取关键字
+        List<String> keyWordList = HanLP.extractKeyword(keyword, 3);
+        redisService.execute(new SessionCallback<Object>() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                operations.multi();
+                for (String keyword : keyWordList) {
+                    operations.opsForZSet().incrementScore(RedisKey.DATA_HOTWORD_KEY, keyword, 1D);
+                }
+                operations.expire(RedisKey.DATA_HOTWORD_KEY, Duration.ofHours(24));
+                return operations.exec();
+            }
+        });
     }
 
     @Override
@@ -72,5 +88,12 @@ public class DataServiceImpl implements DataService {
                 return count;
             }
         });
+    }
+
+    @Override
+    public List<String> getHotWord() {
+        Set<Object> keyWordTop = redisService.zReverseRangeByScore(RedisKey.DATA_HOTWORD_KEY, 0, Double.MAX_VALUE, 0, 10);
+        List<String> topTen = (List<String>)(List) Arrays.asList(keyWordTop.toArray());
+        return topTen;
     }
 }

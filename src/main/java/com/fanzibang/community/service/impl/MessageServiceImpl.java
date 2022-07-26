@@ -134,8 +134,7 @@ public class MessageServiceImpl implements MessageService {
         User user = userHolder.getUser();
         Page<Message> page = new Page<>(1,10,false);
         if (ObjectUtil.isNotEmpty(current) && ObjectUtil.isNotEmpty(size)) {
-            page.setCurrent(current);
-            page.setSize(size);
+            page.setCurrent(current).setSize(size);
         }
         LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Message::getType, entityType).eq(Message::getToId, user.getId());

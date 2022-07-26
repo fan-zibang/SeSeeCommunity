@@ -129,6 +129,8 @@ public interface RedisService {
 
     Long zCard(String key);
 
+    Set<Object> zReverseRangeByScore(String key, double min, double max, long offset, long count);
+
     Long pfAdd(String key, Object... value);
 
     Long pfCount(String... key);

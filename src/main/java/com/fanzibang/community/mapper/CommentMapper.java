@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CommentMapper extends BaseMapper<Comment> {
+    Long getParentCommentCount(Long postId);
 
-
+    Long getChildCommentCount(Long postId);
 }

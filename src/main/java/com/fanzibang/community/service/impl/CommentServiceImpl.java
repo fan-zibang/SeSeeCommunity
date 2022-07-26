@@ -62,8 +62,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<Map<String, Object>> getCommentList(Long postId, Integer current, Integer size) {
         Page<Comment> page = new Page<>(1, 10,false);
-        if (!ObjectUtil.isEmpty(current) && !ObjectUtil.isEmpty(size)) {
-            page = new Page<>(current, size,false);
+        if (ObjectUtil.isNotNull(current) && ObjectUtil.isNotNull(size)) {
+            page.setCurrent(current).setSize(size);
         }
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Comment::getEntityType, EntityTypeConstant.ENTITY_TYPE_POST)
@@ -73,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
 
         // 封装评论及其相关信息
         List<Map<String, Object>> commentVoList = new ArrayList<>();
-        if (!ObjectUtil.isNull(commentList)) {
+        if (ObjectUtil.isNotNull(commentList)) {
             for (Comment comment : commentList) {
                 Map<String, Object> commentVo = new HashMap<>();
                 commentVo.put("id", comment.getId());
@@ -88,7 +88,7 @@ public class CommentServiceImpl implements CommentService {
                 if (ObjectUtil.isNull(user)) {
                     commentVo.put("is_like", false);
                 }else {
-                    Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId(), user.getId());
+                    boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, comment.getId(), user.getId());
                     commentVo.put("is_like", like);
                 }
                 commentVo.put("is_show", false);
@@ -104,16 +104,16 @@ public class CommentServiceImpl implements CommentService {
                     replyCommentVo.put("id", replyComment.getId());
 
                     User replyCommentUser = userService.getById(replyComment.getUserId());
-                    String replyNickName = !ObjectUtil.isEmpty(replyCommentUser) ? replyCommentUser.getNickname() : null;
+                    String replyNickName = ObjectUtil.isNotNull(replyCommentUser) ? replyCommentUser.getNickname() : null;
                     replyCommentVo.put("reply_nickname", replyNickName);
 
                     replyCommentVo.put("content", replyComment.getContent());
 
                     User targetUser = userService.getById(replyComment.getTargetId());
-                    String targetNickName = !ObjectUtil.isEmpty(targetUser) ? targetUser.getNickname() : null;
+                    String targetNickName = ObjectUtil.isNotNull(targetUser) ? targetUser.getNickname() : null;
                     replyCommentVo.put("target_nickname", targetNickName);
 
-                    if (ObjectUtil.isEmpty(user)) {
+                    if (ObjectUtil.isNull(user)) {
                         replyCommentVo.put("is_like", false);
                     } else {
                         Boolean like = likeService.isLike(EntityTypeConstant.ENTITY_TYPE_COMMENT, replyComment.getId(), user.getId());
@@ -130,11 +130,27 @@ public class CommentServiceImpl implements CommentService {
         return commentVoList;
     }
 
+    @Override
+    public Map<String, Object> getCommentCount(Long postId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("parentCommentCount", getParentCommentCount(postId));
+        map.put("childCommentCount", getChildCommentCount(postId));
+        return map;
+    }
+
+    public Long getParentCommentCount(Long postId) {
+        return commentMapper.getParentCommentCount(postId);
+    }
+
+    public Long getChildCommentCount(Long postId) {
+        return commentMapper.getChildCommentCount(postId);
+    }
+
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     @Override
     public Integer addComment(Long postId, CommentParam commentParam) {
         User user = userHolder.getUser();
-        if (ObjectUtil.isEmpty(user)) {
+        if (ObjectUtil.isNull(user)) {
             Asserts.fail(ReturnCode.RC205);
         }
         Comment comment = new Comment();
