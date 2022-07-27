@@ -41,6 +41,11 @@ public class DiscussPostController {
         return discussPostService.publishDiscussPost(discussPostParam);
     }
 
+    @PutMapping("/essence/{postId}")
+    public Integer setEssence(@PathVariable("postId") Long postId) {
+        return discussPostService.setEssence(postId);
+    }
+
     @DeleteMapping("/{id}")
     public int deleteDiscussPost(@PathVariable("id") Long id) {
         return discussPostService.deleteDiscussPost(id);

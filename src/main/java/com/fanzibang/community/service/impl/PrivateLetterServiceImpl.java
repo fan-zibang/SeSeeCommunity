@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,10 +69,8 @@ public class PrivateLetterServiceImpl implements PrivateLetterService {
      */
     @Override
     public List<PrivateLetterListVo> getPrivateLetterList(Integer current, Integer size) {
-        if (ObjectUtil.isEmpty(current) || ObjectUtil.isEmpty(size)) {
-            current = 1;
-            size = 40;
-        }
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(40);
         Long currentUserId = userHolder.getUser().getId();
         List<PrivateLetter> privateLetterList =
                 privateLetterMapper.getPrivateLetterList(current-1, size, currentUserId);

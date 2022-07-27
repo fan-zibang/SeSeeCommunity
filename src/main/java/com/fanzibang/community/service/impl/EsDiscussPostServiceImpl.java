@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.fanzibang.community.constant.EntityTypeConstant;
+import com.fanzibang.community.pojo.Comment;
 import com.fanzibang.community.pojo.DiscussPost;
 import com.fanzibang.community.pojo.Topic;
 import com.fanzibang.community.pojo.User;
@@ -62,15 +63,12 @@ public class EsDiscussPostServiceImpl implements EsDiscussPostService {
     }
 
     @Override
-    public Page<DiscussPostDetailVo> search(String keyword, Integer current, Integer size, Integer topicId,Integer sort) {
+    public Page<DiscussPostDetailVo> search(String keyword, Integer current, Integer size, Integer topicId, Integer sort) {
         // 热词统计
         dataService.setHotWord(keyword);
-        Pageable pageable = null;
-        if (ObjectUtil.isNotNull(current) && ObjectUtil.isNotNull(size)) {
-            pageable = PageRequest.of(current-1, size);
-        } else {
-            pageable = PageRequest.of(0, 20);
-        }
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(20);
+        Pageable pageable = PageRequest.of(current-1, size);
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
         queryBuilder.withPageable(pageable);
         if (StrUtil.isEmpty(keyword)) {

@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -127,14 +128,13 @@ public class DiscussPostServiceImpl implements DiscussPostService {
 
     @Override
     public List<DiscussPostDetailVo> getDiscussPostList(Long userId, Integer current, Integer size, Integer mode) {
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(20);
         // mode 1-热度 2-最新 userId=0查询所有用户
         if (userId == 0 && mode == 1) {
              return postListCache.get(current + ":" + size);
         }
-        Page<DiscussPost> page = new Page<>(1, 10, false); // 默认 current-1，size-10
-        if (ObjectUtil.isNotNull(current) && ObjectUtil.isNotNull(size)) {
-            page.setCurrent(current).setSize(size).setSearchCount(false);
-        }
+        Page<DiscussPost> page = new Page<>(current, size, false); // 默认 current-1，size-20
         LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.orderByDesc(DiscussPost::getCreateTime);
         if (userId != 0) {
@@ -317,4 +317,14 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         return discussPostDetailVo;
     }
 
+    @Override
+    public Integer setEssence(Long postId) {
+        LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(DiscussPost::getStatus, 1).eq(DiscussPost::getId, postId);
+        int i = discussPostMapper.update(null, updateWrapper);
+        if (i <= 0) {
+            Asserts.fail(ReturnCode.RC303);
+        }
+        return i;
+    }
 }

@@ -40,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/discussPost/essence/{postId}").authenticated()
                 .antMatchers(HttpMethod.GET,
                         "/",
                         "/*.html",

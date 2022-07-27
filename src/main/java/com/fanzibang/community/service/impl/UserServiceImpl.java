@@ -6,7 +6,6 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fanzibang.community.constant.RedisKey;
 import com.fanzibang.community.constant.ReturnCode;
 import com.fanzibang.community.dto.UserInfoParam;
 import com.fanzibang.community.exception.Asserts;

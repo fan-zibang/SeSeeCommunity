@@ -20,10 +20,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -61,10 +58,10 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public List<Map<String, Object>> getCommentList(Long postId, Integer current, Integer size) {
-        Page<Comment> page = new Page<>(1, 10,false);
-        if (ObjectUtil.isNotNull(current) && ObjectUtil.isNotNull(size)) {
-            page.setCurrent(current).setSize(size);
-        }
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(20);
+        Page<Comment> page = new Page<>(current, size,false);
+
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Comment::getEntityType, EntityTypeConstant.ENTITY_TYPE_POST)
                 .eq(Comment::getEntityId, postId)

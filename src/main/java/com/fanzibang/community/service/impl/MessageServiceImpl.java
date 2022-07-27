@@ -131,11 +131,10 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private List<Message> getMessageList(Integer entityType, Integer current, Integer size) {
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(20);
+        Page<Message> page = new Page<>(current,size,false);
         User user = userHolder.getUser();
-        Page<Message> page = new Page<>(1,10,false);
-        if (ObjectUtil.isNotEmpty(current) && ObjectUtil.isNotEmpty(size)) {
-            page.setCurrent(current).setSize(size);
-        }
         LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Message::getType, entityType).eq(Message::getToId, user.getId());
         Page<Message> messagePage = messageMapper.selectPage(page, queryWrapper);
