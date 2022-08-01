@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanzibang.community.mapper.RoleResourceRelationMapper">
+
+    <select id="getRoleResource" resultType="com.fanzibang.community.vo.ResourceVo">
+        select r.id, r.`name`
+        from t_role_resource_relation rrr
+                 left join t_resource r on r.id = rrr.resource_id
+        where rrr.role_id = #{roleId}
+    </select>
+
+    <insert id="allotResource">
+        insert into t_role_resource_relation(role_id, resource_id) values
+        <foreach collection="list" separator="," item="item" index="index">
+            (#{item.roleId}, #{item.resourceId})
+        </foreach>
+    </insert>
+
+</mapper>

@@ -11,11 +11,9 @@ import com.fanzibang.community.dto.UserInfoParam;
 import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.UserMapper;
 import com.fanzibang.community.pojo.User;
-import com.fanzibang.community.service.FollowService;
-import com.fanzibang.community.service.LikeService;
-import com.fanzibang.community.service.LoginService;
-import com.fanzibang.community.service.UserService;
+import com.fanzibang.community.service.*;
 import com.fanzibang.community.utils.UserHolder;
+import com.fanzibang.community.vo.RoleVo;
 import com.fanzibang.community.vo.UserDetailVo;
 import com.fanzibang.community.vo.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private UserRoleRelationService userRoleRelationService;
 
     @Autowired
     private UserMapper userMapper;
@@ -118,4 +119,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<Long> getAllUserIds() {
         return userMapper.getAllUserIds();
     }
+
+    /**
+     * 获取用户的角色
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<RoleVo> getUserRole(Long userId) {
+        return userRoleRelationService.getUserRole(userId);
+    }
+
 }

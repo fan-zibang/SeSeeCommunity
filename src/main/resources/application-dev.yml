@@ -85,4 +85,25 @@ caffeine:
     max-size: 15
     expire: 1440
 
-
+secure:
+  ignored:
+    urls:
+      - /**/*.ico
+      - /**/*.html
+      - /**/*.css
+      - /**/*.js
+      - /login
+      - /register
+      - /activation/**
+      - /discussPost
+      - /discussPost/list
+      - /discussPost/count
+      - /discussPost/{id}
+      - /discussPost/delete/{id}
+      - /esDiscussPost/**
+      - /user/{userId}
+      - /data/hotWord
+      - /comment/{postId}
+      - /comment/count/{postId}
+      - /topic/list
+      - /topic/pageList

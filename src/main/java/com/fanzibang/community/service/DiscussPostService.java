@@ -21,5 +21,7 @@ public interface DiscussPostService {
 
     void refreshPostScore();
 
-    Integer setEssence(Long postId);
+    Integer setEssence(Long postId, Integer mode);
+
+    Integer setBlock(Long postId, Integer mode);
 }

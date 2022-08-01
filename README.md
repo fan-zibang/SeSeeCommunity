@@ -9,7 +9,6 @@
 | Spring Boot     | 2.5.12  | 容器+MVC框架     |
 | Spring Security | 2.5.12 | 认证和授权框架   |
 | Spring Mail     | 2.5.12       | 邮件服务         |
-| Spring Quartz   | 2.5.12       | 分布式定时任务   |
 | MySQL           | 8.0    | 数据库           |
 | MyBatis-Plus    | 3.5.1  | ORM框架          |
 | Elasticsearch   | 7.6.2  | 搜索引擎         |

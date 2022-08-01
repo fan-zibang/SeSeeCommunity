@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fanzibang.community.constant.*;
 import com.fanzibang.community.dto.DiscussPostParam;
+import com.fanzibang.community.exception.ApiException;
 import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.DiscussPostMapper;
 import com.fanzibang.community.mq.MessageProducer;
@@ -161,6 +162,11 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         return discussPostMapper.selectCount(queryWrapper);
     }
 
+    /**
+     * 获取帖子详情
+     * @param id
+     * @return
+     */
     @Override
     public DiscussPostDetailVo getDiscussPostDetail(Long id) {
         DiscussPost post = getDiscussPostById(id);
@@ -215,17 +221,23 @@ public class DiscussPostServiceImpl implements DiscussPostService {
 
     @Override
     public Integer deleteDiscussPost(Long id) {
-        Long userId = userHolder.getUser().getId();
+        DiscussPost discussPost = discussPostMapper.selectById(id);
+        Optional.ofNullable(discussPost).orElseThrow(() -> new ApiException(ReturnCode.RC301));
+        User user = userHolder.getUser();
+        Optional.ofNullable(user).orElseThrow(() -> new ApiException(ReturnCode.RC205));
+        if (discussPost.getUserId() != user.getId()) {
+            Asserts.fail(ReturnCode.RC305);
+        }
         int i = discussPostMapper.deleteById(id);
         if (i <= 0) {
-            Asserts.fail("删除帖子失败");
+            Asserts.fail(ReturnCode.RC305);
         }
         // 触发删帖事件，通过消息队列更新 Elasticsearch 服务器
         Event event = new Event()
                 .setExchange(RabbitMqEnum.C_SYSTEM_MESSAGE_BROKER.getExchange())
                 .setRoutingKey(RabbitMqEnum.C_SYSTEM_MESSAGE_BROKER.getRoutingKey())
                 .setFromId(MessageConstant.SYSTEM_USER_ID)
-                .setToId(userId)
+                .setToId(user.getId())
                 .setData("postId", id);
         messageProducer.sendMessage(event);
         return i;
@@ -233,9 +245,7 @@ public class DiscussPostServiceImpl implements DiscussPostService {
 
     @Override
     public DiscussPost getDiscussPostById(Long postId) {
-        LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(DiscussPost::getId, postId);
-        return discussPostMapper.selectOne(queryWrapper);
+        return discussPostMapper.selectById(postId);
     }
 
     @Override
@@ -317,14 +327,51 @@ public class DiscussPostServiceImpl implements DiscussPostService {
         return discussPostDetailVo;
     }
 
+    /**
+     * 加精帖子
+     * @param postId
+     * @param mode 操作：0-取消加精 1-加精
+     * @return
+     */
     @Override
-    public Integer setEssence(Long postId) {
-        LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(DiscussPost::getStatus, 1).eq(DiscussPost::getId, postId);
-        int i = discussPostMapper.update(null, updateWrapper);
+    public Integer setEssence(Long postId, Integer mode) {
+        int i = 0;
+        if (mode == 0) {
+            i = updateDiscussPostStatus(StatusConstant.POST_TYPE_NORMAL, postId);
+        }
+        if (mode == 1) {
+            i = updateDiscussPostStatus(StatusConstant.POST_TYPE_ESSENCE, postId);
+        }
         if (i <= 0) {
             Asserts.fail(ReturnCode.RC303);
         }
         return i;
+    }
+
+    /**
+     * 拉黑帖子
+     * @param postId
+     * @param mode 操作：0-取消拉黑 1-拉黑
+     * @return
+     */
+    @Override
+    public Integer setBlock(Long postId, Integer mode) {
+        int i = 0;
+        if (mode == 0) {
+            i = updateDiscussPostStatus(StatusConstant.POST_STATUS_NORMAL, postId);
+        }
+        if (mode == 1) {
+            i = updateDiscussPostStatus(StatusConstant.POST_STATUS_BLOCK, postId);
+        }
+        if (i <= 0) {
+            Asserts.fail(ReturnCode.RC304);
+        }
+        return i;
+    }
+
+    private Integer updateDiscussPostStatus(Integer status, Long postId) {
+        LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(DiscussPost::getStatus, status).eq(DiscussPost::getId, postId);
+        return discussPostMapper.update(null, updateWrapper);
     }
 }

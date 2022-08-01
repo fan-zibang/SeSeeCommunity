@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.*;
 import java.util.List;
 
 @Validated
@@ -19,15 +18,13 @@ public class DiscussPostController {
     @Autowired
     private DiscussPostService discussPostService;
 
-    @GetMapping
-    public List<DiscussPostDetailVo> getDiscussPostList(@Valid @NotNull Long userId, Integer current, Integer size,
-                                                 @Valid @Min(value = 1, message = "模式：1-热度；2-最新")
-                                                            @Max(value = 2, message = "模式：1-热度；2-最新") Integer mode) {
+    @GetMapping("/list")
+    public List<DiscussPostDetailVo> getDiscussPostList(Long userId, Integer current, Integer size, Integer mode) {
         return discussPostService.getDiscussPostList(userId, current, size, mode);
     }
 
     @GetMapping("/count")
-    public Long getDiscussPostCount(@Valid @NotNull Long userId) {
+    public Long getDiscussPostCount(Long userId) {
         return discussPostService.getDiscussPostCount(userId);
     }
 
@@ -42,11 +39,16 @@ public class DiscussPostController {
     }
 
     @PutMapping("/essence/{postId}")
-    public Integer setEssence(@PathVariable("postId") Long postId) {
-        return discussPostService.setEssence(postId);
+    public Integer setEssence(@PathVariable("postId") Long postId, Integer mode) {
+        return discussPostService.setEssence(postId, mode);
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("/block/{postId}")
+    public Integer setBlock(@PathVariable("postId") Long postId, Integer mode) {
+        return discussPostService.setBlock(postId, mode);
+    }
+
+    @DeleteMapping("/delete/{id}")
     public int deleteDiscussPost(@PathVariable("id") Long id) {
         return discussPostService.deleteDiscussPost(id);
     }

@@ -101,7 +101,7 @@ public class MessageConsumer {
             logger.error("消息内容为空");
             return;
         }
-        Long postId = (Long) event.getData().get("postId");
+        Long postId = Long.valueOf(event.getData().get("postId").toString());
         if (ObjectUtil.isEmpty(postId)) {
             logger.error("postId为空，es删除帖子失败");
             return;

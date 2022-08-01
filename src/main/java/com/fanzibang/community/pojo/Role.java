@@ -5,13 +5,13 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 
 @Data
-public class Topic {
+public class Role {
 
     private Integer id;
     @NotEmpty
     private String name;
-    @NotEmpty
-    private String summary;
+    private String description;
     private Long createTime;
+    private Byte status;
 
 }

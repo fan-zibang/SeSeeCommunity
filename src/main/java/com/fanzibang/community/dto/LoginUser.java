@@ -1,5 +1,6 @@
 package com.fanzibang.community.dto;
 
+import com.fanzibang.community.pojo.Resource;
 import com.fanzibang.community.pojo.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -17,13 +18,12 @@ import java.util.stream.Collectors;
 public class LoginUser implements UserDetails {
 
     private User user;
-
     //存储权限信息
-    private List<String> permissionList;
+    private List<Resource> resourceList;
 
-    public LoginUser(User user, List<String> permissionList) {
+    public LoginUser(User user, List<Resource> resourceList) {
         this.user = user;
-        this.permissionList = permissionList;
+        this.resourceList = resourceList;
     }
 
     //存储SpringSecurity所需要的权限信息的集合
@@ -36,8 +36,8 @@ public class LoginUser implements UserDetails {
             return authorities;
         }
         // 返回当前用户的权限
-        authorities = permissionList.stream()
-                .map(SimpleGrantedAuthority::new)
+        authorities = resourceList.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getId() + ":" + role.getName()))
                 .collect(Collectors.toList());
         return authorities;
     }

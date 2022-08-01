@@ -11,7 +11,6 @@ public class User {
     private String nickname;
     private Byte sex;
     private String location;
-    private Integer role;
     private Byte status;
     private String avatar;
     private Long createTime;
