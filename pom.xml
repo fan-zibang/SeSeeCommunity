@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.fanzibang</groupId>
     <artifactId>Community</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
     <name>Community</name>
     <properties>
         <java.version>1.8</java.version>

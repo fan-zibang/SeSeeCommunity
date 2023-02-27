@@ -1,4 +1,4 @@
-# Community
+# SeeseCommunity
 
 ## 核心技术栈
 
@@ -44,6 +44,28 @@
 
 ## 页面展示
 
+前端项目传送门：https://github.com/ChowYonken/community
+
+https://raw.githubusercontent.com/fan-zibang/blog4.0-backend/master/assets/IMG_7721-7505246.jpeg
+
+![image-20230227215741531](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215741531.png)
+
+![image-20230227215804682](/Users/BrantleyFan/JavaProject/Community/assets/image-20230227215804682.png)
+
+![image-20230227215818760](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215818760.png)
+
+![image-20230227215826246](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215826246.png)
+
+![image-20230227215839069](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215839069.png)
+
+![image-20230227215850745](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215850745.png)
+
+![image-20230227215855890](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215855890.png)
+
+![image-20230227215902107](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215902107.png)
+
+![image-20230227215919162](https://raw.githubusercontent.com/fan-zibang/SeSeeCommunity/master/assets/image-20230227215919162.png)
+
 
 
 
@@ -63,7 +85,8 @@
 - 关注列表
 - 粉丝列表
 - 显示通知（系统+点赞+评论+关注）
-
+- 私信
+- 帖子热度更新
 
 
 

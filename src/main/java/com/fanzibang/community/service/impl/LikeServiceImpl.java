@@ -57,7 +57,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public void like(Long postId, Integer entityType, Long entityId) {
-        Long userId = userHolder.getUser().getId();
+        long userId = userHolder.getUser().getId();
         String suffixKey = null;
         Long entityUserId = null;
         if (entityType == EntityTypeConstant.ENTITY_TYPE_POST) {
@@ -76,7 +76,7 @@ public class LikeServiceImpl implements LikeService {
         boolean isLike = redisService.sIsMember(RedisKey.LIKE_KEY + suffixKey + entityId, userId);
         boolean isLimit = redisService.sIsMember(RedisKey.LIKE_LIMIT_KEY + suffixKey + entityId, userId);
         String finalSuffixKey = suffixKey;
-        Long finalEntityUserId = entityUserId;
+        long finalEntityUserId = entityUserId;
         Object execute = redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {

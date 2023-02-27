@@ -19,12 +19,14 @@ public class DiscussPostDetailVo {
     private String content;
     // 是否已经点赞
     private Boolean isLike;
+    // 是否精华帖
+    private Boolean isEssence;
     // 点赞数量
     private Long likeCount;
     // 评论数量
     private Long commentCount;
-    // 所属板块
-    private String plate;
+    // 所属话题
+    private String Topic;
     // 发布时间
     private String createTime;
 

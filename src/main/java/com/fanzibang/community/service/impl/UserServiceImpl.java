@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fanzibang.community.constant.ReturnCode;
 import com.fanzibang.community.dto.UserInfoParam;
@@ -20,7 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Service("userService")
@@ -46,6 +50,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserHolder userHolder;
+
+    @Override
+    public Map<String, Object> getUserPageList(Integer current, Integer size) {
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(20);
+        Page<User> page = new Page<>(current, size);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(User::getId,User::getEmail,User::getNickname,User::getSex,
+                User::getLocation,User::getStatus,User::getAvatar, User::getCreateTime,
+                User::getDelFlag, User::getLastLogin);
+        Page<User> userPage = userMapper.selectPage(page, queryWrapper);
+        Map<String, Object> map = new HashMap<>();
+        map.put("userList", userPage.getRecords());
+        map.put("total", userPage.getTotal());
+        return map;
+    }
 
     @Override
     public Integer updateUserInfo(UserInfoParam userInfoParam) {

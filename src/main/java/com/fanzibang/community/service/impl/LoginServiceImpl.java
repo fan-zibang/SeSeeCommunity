@@ -86,7 +86,7 @@ public class LoginServiceImpl implements LoginService {
             Asserts.fail("账号注册失败");
         }
         // 给注册用户发送激活邮件
-        Long newUserId = newUser.getId();
+        long newUserId = newUser.getId();
         sendEmailCodeToUser(newUserId, email);
         return newUserId;
     }
@@ -141,14 +141,14 @@ public class LoginServiceImpl implements LoginService {
                 new UsernamePasswordAuthenticationToken(userParam.getEmail(), userParam.getPassword());
         // 认证
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
-        if (ObjectUtil.isEmpty(authenticate)) {
+        if (ObjectUtil.isNull(authenticate)) {
             Asserts.fail(ReturnCode.RC202);
         }
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         if (!loginUser.isEnabled()) {
             Asserts.fail(ReturnCode.RC203);
         }
-        Long userId = loginUser.getUser().getId();
+        long userId = loginUser.getUser().getId();
         String token = jwtTokenUtil.generateToken(userId);
         redisService.set(RedisKey.LOGIN_USER_KEY + userId, loginUser, 1440);
         return token;
@@ -157,7 +157,7 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public void logout() {
         User user = userHolder.getUser();
-        if (ObjectUtil.isEmpty(user)) {
+        if (ObjectUtil.isNull(user)) {
             Asserts.fail(ReturnCode.RC205);
         }
         Boolean isLogout = redisService.del(RedisKey.LOGIN_USER_KEY + user.getId());
@@ -168,7 +168,6 @@ public class LoginServiceImpl implements LoginService {
         LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(User::getLastLogin,System.currentTimeMillis()).eq(User::getId,user.getId());
         userMapper.update(null,updateWrapper);
-
     }
 
 }

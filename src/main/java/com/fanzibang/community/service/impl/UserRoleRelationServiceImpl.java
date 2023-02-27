@@ -2,10 +2,12 @@ package com.fanzibang.community.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fanzibang.community.constant.RedisKey;
 import com.fanzibang.community.constant.ReturnCode;
 import com.fanzibang.community.exception.Asserts;
 import com.fanzibang.community.mapper.UserRoleRelationMapper;
 import com.fanzibang.community.pojo.UserRoleRelation;
+import com.fanzibang.community.service.RedisService;
 import com.fanzibang.community.service.UserRoleRelationService;
 import com.fanzibang.community.vo.RoleVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class UserRoleRelationServiceImpl implements UserRoleRelationService {
 
     @Autowired
     private UserRoleRelationMapper userRoleRelationMapper;
+
+    @Autowired
+    private RedisService redisService;
 
     @Override
     public List<RoleVo> getUserRole(Long userId) {
@@ -43,6 +48,8 @@ public class UserRoleRelationServiceImpl implements UserRoleRelationService {
             }
             i = userRoleRelationMapper.allotRole(userRoleRelationList);
         }
+        // 删除用户的登录缓存，重新登录获取相应角色权限
+        redisService.del(RedisKey.LOGIN_USER_KEY + userId);
         if (i <= 0) {
             Asserts.fail(ReturnCode.RC656);
         }

@@ -43,7 +43,7 @@ public class PrivateLetterServiceImpl implements PrivateLetterService {
     @Override
     public Integer sendPrivateLetter(Long toId, String content) {
         PrivateLetter privateLetter = new PrivateLetter();
-        Long fromId = userHolder.getUser().getId();
+        long fromId = userHolder.getUser().getId();
         privateLetter.setFromId(fromId);
         privateLetter.setToId(toId);
         if (fromId < toId) {
@@ -71,7 +71,7 @@ public class PrivateLetterServiceImpl implements PrivateLetterService {
     public List<PrivateLetterListVo> getPrivateLetterList(Integer current, Integer size) {
         current = Optional.ofNullable(current).orElse(1);
         size = Optional.ofNullable(size).orElse(40);
-        Long currentUserId = userHolder.getUser().getId();
+        long currentUserId = userHolder.getUser().getId();
         List<PrivateLetter> privateLetterList =
                 privateLetterMapper.getPrivateLetterList(current-1, size, currentUserId);
         List<PrivateLetterListVo> privateLetterVoList = new ArrayList<>();
@@ -132,7 +132,7 @@ public class PrivateLetterServiceImpl implements PrivateLetterService {
             privateLetterVoList.add(privateLetterVo);
         }
         // 未读的私信变为已读
-        Long userId = userHolder.getUser().getId();
+        long userId = userHolder.getUser().getId();
         List<Long> unReadLetterList = privateLetterList.stream().filter(letter -> letter.getStatus() == 0 && letter.getToId() == userId)
                 .map(PrivateLetter::getId)
                 .collect(Collectors.toList());

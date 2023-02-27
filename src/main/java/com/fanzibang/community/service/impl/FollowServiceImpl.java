@@ -46,8 +46,8 @@ public class FollowServiceImpl implements FollowService {
     public void follow(Integer entityType, Long entityId) {
         User user = userHolder.getUser();
         Optional.ofNullable(user).orElseThrow(() -> new ApiException(ReturnCode.RC205));
-        Boolean follow = isFollow(entityType, entityId);
-        Boolean limit = redisService.sIsMember(RedisKey.FOLLOW_LIMIT_KEY + entityId, user.getId());
+        boolean follow = isFollow(entityType, entityId);
+        boolean limit = redisService.sIsMember(RedisKey.FOLLOW_LIMIT_KEY + entityId, user.getId());
         Object execute = redisService.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
@@ -91,7 +91,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Boolean isFollow(Integer entityType, Long entityId) {
-        Long userId = userHolder.getUser().getId();
+        long userId = userHolder.getUser().getId();
         Double score = null;
         if (entityType == EntityTypeConstant.ENTITY_TYPE_USER) {
             score = redisService.zScore(RedisKey.USER_FOLLOWER_KEY + userId, entityId);
@@ -130,14 +130,14 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public List<UserFollowVo> getFollowerList(Long uid) {
-        Long end = getUserFollowCount(EntityTypeConstant.ENTITY_TYPE_USER, uid);
+        long end = getUserFollowCount(EntityTypeConstant.ENTITY_TYPE_USER, uid);
         Set<Integer> targetUserIds = redisTemplate.opsForZSet().reverseRange(RedisKey.USER_FOLLOWER_KEY + uid, 0, end);
         return copyToList(uid, targetUserIds);
     }
 
     @Override
     public List<UserFollowVo> getFansList(Long uid) {
-        Long end = getFansCount(uid);
+        long end = getFansCount(uid);
         Set<Integer> targetUserIds = redisTemplate.opsForZSet().reverseRange(RedisKey.USER_FANS_KEY + uid, 0, end);
         return copyToList(uid, targetUserIds);
     }

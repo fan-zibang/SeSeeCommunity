@@ -127,17 +127,39 @@ public class DiscussPostServiceImpl implements DiscussPostService {
                 });
     }
 
+    /**
+     * @param userId
+     * @param current
+     * @param size
+     * @param mode 1-热度 2-最新 userId = 0 查询所有用户
+     * @return
+     */
     @Override
     public List<DiscussPostDetailVo> getDiscussPostList(Long userId, Integer current, Integer size, Integer mode) {
         current = Optional.ofNullable(current).orElse(1);
         size = Optional.ofNullable(size).orElse(20);
-        // mode 1-热度 2-最新 userId=0查询所有用户
         if (userId == 0 && mode == 1) {
-             return postListCache.get(current + ":" + size);
+            return postListCache.get(current + ":" + size);
         }
         Page<DiscussPost> page = new Page<>(current, size, false); // 默认 current-1，size-20
         LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(DiscussPost::getCreateTime);
+        queryWrapper.eq(DiscussPost::getStatus, 0)
+                .orderByDesc(DiscussPost::getCreateTime);
+        if (userId != 0) {
+            queryWrapper.eq(DiscussPost::getUserId, userId);
+        }
+        List<DiscussPost> discussPostList = discussPostMapper.selectPage(page, queryWrapper).getRecords();
+        return copyList(discussPostList);
+    }
+
+    @Override
+    public List<DiscussPostDetailVo> getDiscussPostBlockList(Long userId, Integer current, Integer size) {
+        current = Optional.ofNullable(current).orElse(1);
+        size = Optional.ofNullable(size).orElse(20);
+        Page<DiscussPost> page = new Page<>(current, size, false); // 默认 current-1，size-20
+        LambdaQueryWrapper<DiscussPost> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DiscussPost::getStatus, 1)
+                .orderByDesc(DiscussPost::getCreateTime);
         if (userId != 0) {
             queryWrapper.eq(DiscussPost::getUserId, userId);
         }
@@ -262,10 +284,10 @@ public class DiscussPostServiceImpl implements DiscussPostService {
                 return ;
             }
             boolean isWonderful = discussPost.getType() == 1;
-            Long commentCount = discussPost.getCommentCount();
-            Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, postId);
-            Long userLikeCount = likeService.getUserLikeCount(discussPost.getUserId());
-            Long fansCount = followService.getFansCount(discussPost.getUserId());
+            long commentCount = discussPost.getCommentCount();
+            long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, postId);
+            long userLikeCount = likeService.getUserLikeCount(discussPost.getUserId());
+            long fansCount = followService.getFansCount(discussPost.getUserId());
             /**
              *  score = H + I / (T + 1) ^ G
              *  帖子的热度（分数）= 内容的质量 + 初始质量 / (文章发布以来的时长 + 1) ^ 衰减参数
@@ -316,11 +338,13 @@ public class DiscussPostServiceImpl implements DiscussPostService {
             discussPostDetailVo.setAuthorId(user.getId());
             discussPostDetailVo.setAuthor(user.getNickname());
         }
-        Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());
+        boolean essence = discussPost.getType() == 1 ? true : false;
+        discussPostDetailVo.setIsEssence(essence);
+        long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());
         discussPostDetailVo.setLikeCount(likeCount);
         Topic topic = topicService.getTopicById(discussPost.getTopicId());
         if (ObjectUtil.isNotNull(topic)) {
-            discussPostDetailVo.setPlate(topic.getName());
+            discussPostDetailVo.setTopic(topic.getName());
         }
         String createTime = DateUtil.date(discussPost.getCreateTime()).toString("yyyy-MM-dd HH:mm");
         discussPostDetailVo.setCreateTime(createTime);
@@ -337,10 +361,10 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     public Integer setEssence(Long postId, Integer mode) {
         int i = 0;
         if (mode == 0) {
-            i = updateDiscussPostStatus(StatusConstant.POST_TYPE_NORMAL, postId);
+            i = updateDiscussPostType(StatusConstant.POST_TYPE_NORMAL, postId);
         }
         if (mode == 1) {
-            i = updateDiscussPostStatus(StatusConstant.POST_TYPE_ESSENCE, postId);
+            i = updateDiscussPostType(StatusConstant.POST_TYPE_ESSENCE, postId);
         }
         if (i <= 0) {
             Asserts.fail(ReturnCode.RC303);
@@ -372,6 +396,12 @@ public class DiscussPostServiceImpl implements DiscussPostService {
     private Integer updateDiscussPostStatus(Integer status, Long postId) {
         LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(DiscussPost::getStatus, status).eq(DiscussPost::getId, postId);
+        return discussPostMapper.update(null, updateWrapper);
+    }
+
+    private Integer updateDiscussPostType(Integer type, Long postId) {
+        LambdaUpdateWrapper<DiscussPost> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(DiscussPost::getType, type).eq(DiscussPost::getId, postId);
         return discussPostMapper.update(null, updateWrapper);
     }
 }

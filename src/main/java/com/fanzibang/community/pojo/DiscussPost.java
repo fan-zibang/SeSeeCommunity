@@ -20,7 +20,6 @@ public class DiscussPost {
     private String content;
     @Field(type = FieldType.Byte)
     private Byte type;
-    @Field(type = FieldType.Byte)
     private Byte status;
     @Field(type = FieldType.Long)
     private Long commentCount;

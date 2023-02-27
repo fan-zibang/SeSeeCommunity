@@ -23,6 +23,11 @@ public class DiscussPostController {
         return discussPostService.getDiscussPostList(userId, current, size, mode);
     }
 
+    @GetMapping("/list/block")
+    public List<DiscussPostDetailVo> getDiscussPostBlockList(Long userId, Integer current, Integer size) {
+        return discussPostService.getDiscussPostBlockList(userId, current, size);
+    }
+
     @GetMapping("/count")
     public Long getDiscussPostCount(Long userId) {
         return discussPostService.getDiscussPostCount(userId);

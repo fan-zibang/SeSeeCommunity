@@ -28,6 +28,8 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 
 import java.util.Arrays;
 import java.util.List;
@@ -151,5 +153,13 @@ class CommunityApplicationTests {
     @Test
     void test09() {
         System.out.println(DateUtil.between(DateUtil.date(1658315763611L), DateUtil.date(System.currentTimeMillis()), DateUnit.DAY));
+    }
+
+    @Test
+    void test10() {
+        PathMatcher pathMatcher = new AntPathMatcher();
+        System.out.println(pathMatcher.match("/user/*","/user/pageList"));
+        System.out.println(pathMatcher.match("/user/?","/user/1"));
+        System.out.println(pathMatcher.match("/user/*","/user/1234"));
     }
 }

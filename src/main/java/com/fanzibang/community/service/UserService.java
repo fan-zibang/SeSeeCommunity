@@ -8,6 +8,7 @@ import com.fanzibang.community.vo.UserDetailVo;
 import com.fanzibang.community.vo.UserVo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService extends IService<User> {
 
@@ -22,4 +23,7 @@ public interface UserService extends IService<User> {
     UserDetailVo getUserDetails(Long userId);
 
     List<RoleVo> getUserRole(Long userId);
+
+    Map<String, Object> getUserPageList(Integer current, Integer size);
+
 }

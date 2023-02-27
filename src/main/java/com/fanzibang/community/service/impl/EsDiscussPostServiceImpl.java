@@ -18,6 +18,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -125,11 +126,11 @@ public class EsDiscussPostServiceImpl implements EsDiscussPostService {
         if (ObjectUtil.isNotNull(user)) {
             discussPostDetailVo.setAuthor(user.getNickname());
         }
-        Long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());
+        long likeCount = likeService.getLikeCount(EntityTypeConstant.ENTITY_TYPE_POST, discussPost.getId());
         discussPostDetailVo.setLikeCount(likeCount);
         Topic topic = topicService.getTopicById(discussPost.getTopicId());
         if (ObjectUtil.isNotNull(topic)) {
-            discussPostDetailVo.setPlate(topic.getName());
+            discussPostDetailVo.setTopic(topic.getName());
         }
         String createTime = DateUtil.date(discussPost.getCreateTime()).toString("yyyy-MM-dd HH:mm");
         discussPostDetailVo.setCreateTime(createTime);

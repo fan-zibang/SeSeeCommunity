@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -27,6 +28,11 @@ public class UserController {
 
     @Autowired
     private UserRoleRelationService userRoleRelationService;
+
+    @GetMapping("/page/list")
+    public Map<String, Object> getUserPageList(Integer current, Integer size) {
+        return userService.getUserPageList(current, size);
+    }
 
     @GetMapping
     public UserVo getCurrentUserDetails() {
@@ -43,7 +49,7 @@ public class UserController {
         return userService.getUserRole(userId);
     }
 
-    @PostMapping("/role")
+    @PostMapping("/allot/role")
     public int allotRole (@RequestParam("userId") Long userId, @RequestParam("roleIds") List<Integer> roleIds) {
         return userRoleRelationService.allotRole(userId, roleIds);
     }

@@ -24,4 +24,6 @@ public interface DiscussPostService {
     Integer setEssence(Long postId, Integer mode);
 
     Integer setBlock(Long postId, Integer mode);
+
+    List<DiscussPostDetailVo> getDiscussPostBlockList(Long userId, Integer current, Integer size);
 }
